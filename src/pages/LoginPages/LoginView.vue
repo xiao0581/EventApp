@@ -48,52 +48,41 @@
   </q-page>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { useRouter } from 'vue-router'
 import { Notify } from 'quasar'
 
-export default defineComponent({
-  name: 'LoginPage',
-  setup() {
-    const username = ref<string>('')
-    const password = ref<string>('')
-    const loading = ref<boolean>(false)
+const username = ref<string>('')
+const password = ref<string>('')
+const loading = ref<boolean>(false)
 
-    const authStore = useAuthStore()
-    const router = useRouter()
+const authStore = useAuthStore()
 
-    const handleLogin = async (): Promise<void> => {
-      loading.value = true
-      try {
-        await authStore.login({ username: username.value, password: password.value })
+const router = useRouter()
 
-        Notify.create({
-          type: 'positive',
-          message: 'Login successful!',
-        })
+const handleLogin = async (): Promise<void> => {
+  loading.value = true
+  try {
+    await authStore.login({ username: username.value, password: password.value })
 
-        await router.push('/')
-      } catch (error: unknown) {
-        const message = (error as Error).message || 'An unknown error occurred.'
-        Notify.create({
-          type: 'negative',
-          message,
-        })
-      } finally {
-        loading.value = false
-      }
-    }
+    Notify.create({
+      type: 'positive',
+      message: 'Login successful!',
+    })
 
-    return {
-      username,
-      password,
-      loading,
-      handleLogin,
-    }
-  },
-})
+    await router.push('/')
+  } catch (error: unknown) {
+    const message = (error as Error).message || 'An unknown error occurred.'
+    Notify.create({
+      type: 'negative',
+      message,
+    })
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>

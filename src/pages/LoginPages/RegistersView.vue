@@ -61,54 +61,41 @@
   </q-page>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { Notify } from 'quasar'
 
-export default defineComponent({
-  name: 'RegisterPage',
-  setup() {
-    const username = ref<string>('')
-    const password = ref<string>('')
-    const email = ref<string>('')
-    const loading = ref<boolean>(false)
+const username = ref<string>('')
+const password = ref<string>('')
+const email = ref<string>('')
+const loading = ref<boolean>(false)
 
-    const authStore = useAuthStore()
+const authStore = useAuthStore()
 
-    const handleRegister = async (): Promise<void> => {
-      loading.value = true
-      try {
-        await authStore.register({
-          username: username.value,
-          password: password.value,
-          email: email.value,
-        })
+const handleRegister = async (): Promise<void> => {
+  loading.value = true
+  try {
+    await authStore.register({
+      username: username.value,
+      password: password.value,
+      email: email.value,
+    })
 
-        Notify.create({
-          type: 'positive',
-          message: 'Registration successful!',
-        })
-      } catch (error: unknown) {
-        const message = (error as Error).message || 'An unknown error occurred.'
-        Notify.create({
-          type: 'negative',
-          message,
-        })
-      } finally {
-        loading.value = false
-      }
-    }
-
-    return {
-      username,
-      password,
-      email,
-      loading,
-      handleRegister,
-    }
-  },
-})
+    Notify.create({
+      type: 'positive',
+      message: 'Registration successful!',
+    })
+  } catch (error: unknown) {
+    const message = (error as Error).message || 'An unknown error occurred.'
+    Notify.create({
+      type: 'negative',
+      message,
+    })
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>

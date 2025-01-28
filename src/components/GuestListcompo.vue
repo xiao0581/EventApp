@@ -1,0 +1,66 @@
+<template>
+  <q-list>
+    <q-expansion-item
+      v-for="(group, role) in groupedGuests"
+      :key="role"
+      :label="role"
+      default-opened
+    >
+      <q-list>
+        <q-card v-for="guest in group" :key="guest.id" class="q-mb-md q-pa-sm" bordered>
+          <q-card-section class="row items-center">
+            <q-avatar size="50px" class="q-mr-sm">
+              <q-img :src="guest.avatar || '/assets/images/default-avatar.png'" />
+            </q-avatar>
+
+            <div class="col text-left">
+              <div class="text-weight-medium">{{ guest.name }}</div>
+            </div>
+
+            <q-btn round flat icon="chat_bubble_outline" @click="sendMessage(guest)" />
+          </q-card-section>
+        </q-card>
+      </q-list>
+    </q-expansion-item>
+  </q-list>
+</template>
+
+<script setup lang="ts">
+import { computed, defineProps } from 'vue'
+
+interface Guest {
+  id: number
+  name: string
+  role: string
+  avatar?: string
+}
+
+const props = defineProps<{ guests: Guest[] }>()
+
+const groupedGuests = computed(() => {
+  const groups: Record<string, Guest[]> = {}
+
+  props.guests.forEach((guest) => {
+    const role = guest.role || 'Unknown'
+    if (!groups[role]) {
+      groups[role] = []
+    }
+    groups[role].push(guest)
+  })
+
+  return groups
+})
+
+const sendMessage = (guest: Guest) => {
+  alert(`Send message to ${guest.name}`)
+}
+</script>
+
+<style scoped>
+.q-btn {
+  min-width: 36px;
+}
+.q-card {
+  border-radius: 20px;
+}
+</style>

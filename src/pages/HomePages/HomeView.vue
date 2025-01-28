@@ -40,39 +40,33 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 import { useEventStore } from 'src/stores/eventstores'
 import { useRouter } from 'vue-router'
 
-export default defineComponent({
-  setup() {
-    const eventStore = useEventStore()
-    const router = useRouter()
+const eventStore = useEventStore()
+const router = useRouter()
 
-    const today = new Date()
-    const dayAfterTomorrow = new Date()
-    dayAfterTomorrow.setDate(today.getDate() + 2)
+const today = new Date()
+const dayAfterTomorrow = new Date()
+dayAfterTomorrow.setDate(today.getDate() + 2)
 
-    const events = eventStore.events
-      .map((event) => ({
-        ...event,
-        guests: event.guests || [],
-      }))
-      .filter((event) => {
-        const eventDate = new Date(event.date)
-        return eventDate >= today && eventDate < dayAfterTomorrow
-      })
-
-    console.log(events)
-
-    const goToEvent = async (id: number) => {
-      await router.push(`/event/${id}`)
-    }
-
-    return { events, goToEvent }
-  },
+const events = computed(() => {
+  return eventStore.events
+    .map((event) => ({
+      ...event,
+      guests: event.guests || [],
+    }))
+    .filter((event) => {
+      const eventDate = new Date(event.date)
+      return eventDate >= today && eventDate < dayAfterTomorrow
+    })
 })
+
+const goToEvent = async (id: number) => {
+  await router.push(`/event/${id}`)
+}
 </script>
 
 <style scoped>

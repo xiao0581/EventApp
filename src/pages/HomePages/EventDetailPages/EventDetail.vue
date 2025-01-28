@@ -44,24 +44,7 @@
 
     <div class="event-section">
       <h5>Our guests</h5>
-      <q-list>
-        <q-item
-          v-for="guest in event?.guests"
-          :key="guest.id"
-          clickable
-          @click="viewGuestProfile(guest)"
-        >
-          <q-item-section avatar>
-            <q-avatar size="56px">
-              <q-img :src="guest.avatar || '/assets/images/default-avatar.png'" />
-            </q-avatar>
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>{{ guest.name }}</q-item-label>
-            <q-item-label caption>{{ guest.role }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
+      <GuestListcompo v-if="event" :guests="event.guests" />
     </div>
 
     <div class="event-section">
@@ -80,68 +63,38 @@
   </q-page>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed, ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { computed, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useEventStore } from 'src/stores/eventstores'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import GuestListcompo from 'src/components/GuestListcompo.vue'
 
-interface Guest {
-  id: number
-  name: string
-  role: string
-  avatar?: string
+const route = useRoute()
+const eventStore = useEventStore()
+
+const eventId = computed(() => parseInt(route.params.id as string))
+const event = computed(() => eventStore.getEventById(eventId.value))
+
+const isDescriptionExpanded = ref(false)
+
+const toggleDescription = () => {
+  isDescriptionExpanded.value = !isDescriptionExpanded.value
 }
 
-interface Memory {
-  id: number
-  type: string
-  url: string
+const viewMemory = (memory: { id: number; type: string; url: string }) => {
+  alert(`Viewing memory: ${memory.url}`)
 }
 
-export default defineComponent({
-  setup() {
-    const route = useRoute()
-    const eventStore = useEventStore()
+onMounted(() => {
+  const map = L.map('map').setView([51.505, -0.09], 13)
 
-    const eventId = parseInt(route.params.id as string)
-    const event = computed(() => eventStore.getEventById(eventId))
-    const isDescriptionExpanded = ref(false)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '',
+  }).addTo(map)
 
-    const toggleDescription = () => {
-      isDescriptionExpanded.value = !isDescriptionExpanded.value
-    }
-
-    const viewGuestProfile = (guest: Guest) => {
-      alert(`Viewing profile of ${guest.name}`)
-    }
-
-    const viewMemory = (memory: Memory) => {
-      alert(`Viewing memory: ${memory.url}`)
-    }
-
-    onMounted(() => {
-      const map = L.map('map').setView([51.505, -0.09], 13) // Replace with actual latitude and longitude
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '',
-      }).addTo(map)
-
-      L.marker([55.673, 12.5681]) // Replace with actual latitude and longitude
-        .addTo(map)
-        .bindPopup('Event location')
-        .openPopup()
-    })
-
-    return {
-      isDescriptionExpanded,
-      toggleDescription,
-      event,
-      viewGuestProfile,
-      viewMemory,
-    }
-  },
+  L.marker([55.673, 12.5681]).addTo(map).bindPopup('Event location').openPopup()
 })
 </script>
 

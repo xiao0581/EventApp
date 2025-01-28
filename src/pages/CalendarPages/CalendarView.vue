@@ -52,110 +52,87 @@
   </q-page>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, computed } from 'vue'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
 
 interface Event {
   name: string
   date: string
 }
 
-export default defineComponent({
-  name: 'CalendarComponent',
-  setup() {
-    const year = ref<number>(2024)
-    const month = ref<number>(4)
-    const selectedDate = ref<number | null>(null)
-    const events = ref<Event[]>([
-      { name: 'Team Meeting', date: '2024-05-15' },
-      { name: 'Project Deadline', date: '2024-05-17' },
-      { name: 'Gym Session', date: '2024-05-20' },
-    ])
+const year = ref<number>(2024)
+const month = ref<number>(4)
+const selectedDate = ref<number | null>(null)
+const events = ref<Event[]>([
+  { name: 'Team Meeting', date: '2024-05-15' },
+  { name: 'Project Deadline', date: '2024-05-17' },
+  { name: 'Gym Session', date: '2024-05-20' },
+])
 
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ]
+const monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
 
-    const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
-    const daysInMonth = computed((): number[] => {
-      const days = new Date(year.value, month.value + 1, 0).getDate()
-      return Array.from({ length: days }, (_, i) => i + 1)
-    })
-
-    const formatSelectedDate = computed((): string | null => {
-      if (!selectedDate.value) return null
-      return `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(
-        selectedDate.value,
-      ).padStart(2, '0')}`
-    })
-
-    const filteredEvents = computed((): Event[] =>
-      events.value.filter((event) => event.date === formatSelectedDate.value),
-    )
-
-    const hasEvent = (day: number): boolean => {
-      return events.value.some((event) => event.date === formatDate(day))
-    }
-
-    const formatDate = (day: number): string => {
-      return `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day).padStart(
-        2,
-        '0',
-      )}`
-    }
-
-    const selectDate = (day: number): void => {
-      selectedDate.value = day
-    }
-
-    const previousMonth = (): void => {
-      if (month.value === 0) {
-        month.value = 11
-        year.value--
-      } else {
-        month.value--
-      }
-      selectedDate.value = null
-    }
-
-    const nextMonth = (): void => {
-      if (month.value === 11) {
-        month.value = 0
-        year.value++
-      } else {
-        month.value++
-      }
-      selectedDate.value = null
-    }
-
-    return {
-      year,
-      month,
-      selectedDate,
-      monthNames,
-      weekDays,
-      daysInMonth,
-      formatSelectedDate,
-      filteredEvents,
-      selectDate,
-      previousMonth,
-      nextMonth,
-      hasEvent,
-    }
-  },
+const daysInMonth = computed((): number[] => {
+  const days = new Date(year.value, month.value + 1, 0).getDate()
+  return Array.from({ length: days }, (_, i) => i + 1)
 })
+
+const formatSelectedDate = computed((): string | null => {
+  if (!selectedDate.value) return null
+  return `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(
+    selectedDate.value,
+  ).padStart(2, '0')}`
+})
+
+const filteredEvents = computed((): Event[] =>
+  events.value.filter((event) => event.date === formatSelectedDate.value),
+)
+
+const hasEvent = (day: number): boolean => {
+  return events.value.some((event) => event.date === formatDate(day))
+}
+
+const formatDate = (day: number): string => {
+  return `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+const selectDate = (day: number): void => {
+  selectedDate.value = day
+}
+
+const previousMonth = (): void => {
+  if (month.value === 0) {
+    month.value = 11
+    year.value--
+  } else {
+    month.value--
+  }
+  selectedDate.value = null
+}
+
+const nextMonth = (): void => {
+  if (month.value === 11) {
+    month.value = 0
+    year.value++
+  } else {
+    month.value++
+  }
+  selectedDate.value = null
+}
 </script>
 
 <style scoped>

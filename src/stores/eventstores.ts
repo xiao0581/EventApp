@@ -49,13 +49,13 @@ export const useEventStore = defineStore('event', {
           {
             id: 2,
             name: 'Liam Hayes',
-            role: 'Bride’s family',
+            role: 'groom’s family',
             avatar: 'src/assets/pic/avatar2.jpg',
           },
           {
             id: 3,
             name: 'Liam Hayes',
-            role: 'Bride’s family',
+            role: 'friend',
             avatar: 'src/assets/pic/avatar2.jpg',
           },
           {
@@ -107,6 +107,15 @@ export const useEventStore = defineStore('event', {
   actions: {
     getEventById(id: number): Event | undefined {
       return this.events.find((event) => event.id === id)
+    },
+    updateGuestRole(eventId: number, guestId: number, newRole: string) {
+      const event = this.getEventById(eventId)
+      if (event) {
+        const guest = event.guests.find((g) => g.id === guestId)
+        if (guest) {
+          guest.role = newRole
+        }
+      }
     },
   },
 })
