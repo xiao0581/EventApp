@@ -15,7 +15,6 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   actions: {
-    // 模拟登录
     async login(credentials: { username: string; password: string }): Promise<void> {
       try {
         const response = await fetch('/api/login', {
@@ -43,23 +42,19 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // 模拟注册
     async register(credentials: {
       username: string
       password: string
       email: string
     }): Promise<void> {
       try {
-        // 模拟延迟
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        // 模拟成功注册返回的用户信息
         const mockResponse = {
           username: credentials.username,
-          token: 'mock-token-12345', // 模拟 token
+          token: 'mock-token-12345',
         }
 
-        // 设置用户状态
         this.user = {
           username: mockResponse.username,
           token: mockResponse.token,
