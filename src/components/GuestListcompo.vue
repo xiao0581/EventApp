@@ -7,7 +7,7 @@
       default-opened
     >
       <q-list>
-        <q-card v-for="guest in group" :key="guest.id" class="q-mb-md q-pa-sm" bordered>
+        <q-card v-for="guest in group" :key="guest.id" class="q-mb-md q-pa-sm">
           <q-card-section class="row items-center">
             <q-avatar size="50px" class="q-mr-sm">
               <q-img :src="guest.avatar || '/assets/images/default-avatar.png'" />
@@ -17,16 +17,16 @@
               <div class="text-weight-medium">{{ guest.name }}</div>
             </div>
 
-            <q-btn round flat icon="chat_bubble_outline" @click="sendMessage(guest)" />
+            <q-btn round icon="sym_o_chat_bubble" @click="sendMessage(guest)" />
           </q-card-section>
         </q-card>
       </q-list>
     </q-expansion-item>
   </q-list>
 </template>
-
+S
 <script setup lang="ts">
-import { computed, defineProps } from 'vue'
+import { computed } from 'vue'
 
 interface Guest {
   id: number
@@ -58,9 +58,11 @@ const sendMessage = (guest: Guest) => {
 
 <style scoped>
 .q-btn {
-  min-width: 36px;
+  color: #1e1e1e;
+  background-color: #eaecff;
 }
 .q-card {
   border-radius: 20px;
+  box-shadow: none;
 }
 </style>
