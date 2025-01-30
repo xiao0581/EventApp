@@ -6,10 +6,10 @@
       <h1>{{ event?.name }}</h1>
       <div class="event-info">
         <p class="event-description" :class="{ expanded: isDescriptionExpanded }">
-          {{ event?.discription }}
+          {{ event?.description }}
         </p>
         <q-btn
-          v-if="(event?.discription || '').length > 100"
+          v-if="(event?.description || '').length > 100"
           flat
           label="Show more"
           v-show="!isDescriptionExpanded"
@@ -18,7 +18,7 @@
           style="text-transform: none"
         />
         <q-btn
-          v-if="(event?.discription || '').length > 100"
+          v-if="(event?.description || '').length > 100"
           flat
           label="Show less"
           v-show="isDescriptionExpanded"
@@ -43,8 +43,9 @@
     </div>
 
     <div class="event-section">
-      <h5>Our guests</h5>
-      <GuestListcompo v-if="event" :guests="event.guests" />
+      <h6>Our guests ({{ event?.guests.length || 0 }})</h6>
+      <GuestListcompo v-if="event" :guests="limitedGuests" :grouped="false" />
+      <q-btn flat label="View all guests" class="show-more-btn" style="text-transform: none" />
     </div>
 
     <div class="event-section">
@@ -64,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { useEventStore } from 'src/stores/eventstores'
 import L from 'leaflet'
@@ -77,6 +78,10 @@ const eventStore = useEventStore()
 const eventId = computed(() => parseInt(route.params.id as string))
 const event = computed(() => eventStore.getEventById(eventId.value))
 
+watchEffect(() => {
+  eventStore.getEventById(eventId.value)
+})
+const limitedGuests = computed(() => event.value?.guests.slice(0, 6) || [])
 const isDescriptionExpanded = ref(false)
 
 const toggleDescription = () => {
@@ -177,6 +182,11 @@ onMounted(() => {
 }
 .event-section {
   margin: 16px;
+}
+
+.event-section h6 {
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .event-section h2 {

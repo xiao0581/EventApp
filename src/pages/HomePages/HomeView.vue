@@ -38,19 +38,68 @@
       </div>
     </div>
   </div>
+
+  <div class="invitations-section">
+    <h2>My Invitations ({{ invitations.length }})</h2>
+    <InvitationsCompo />
+  </div>
+
+  <div class="upcoming-events-section">
+    <h2>Upcoming Events</h2>
+    <div
+      class="event-card"
+      v-for="event in upcomingEvents"
+      :key="event.id"
+      @click="goToEvent(event.id)"
+    >
+      <div class="event-card-image">
+        <q-img :src="event.image" alt="Event image" />
+      </div>
+      <div class="event-card-content">
+        <h5 class="event-title">{{ event.name }}</h5>
+        <p><q-icon name="schedule" /> {{ event.startTime }} | {{ event.date }}</p>
+        <p><q-icon name="place" /> {{ event.location }}</p>
+
+        <div class="event-guests">
+          <div class="guest-avatars">
+            <q-avatar v-for="guest in event.guests.slice(0, 5)" :key="guest.id" size="32px">
+              <q-img :src="guest.avatar" alt="Guest avatar" />
+            </q-avatar>
+            <span class="additional-guests" v-if="event.guests.length > 5">
+              +{{ event.guests.length - 5 }}
+            </span>
+          </div>
+          <p class="all-guests">View all guests ></p>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useEventStore } from 'src/stores/eventstores'
 import { useRouter } from 'vue-router'
+import InvitationsCompo from 'src/components/InvitationsCom.vue'
 
 const eventStore = useEventStore()
 const router = useRouter()
-
 const today = new Date()
 const dayAfterTomorrow = new Date()
 dayAfterTomorrow.setDate(today.getDate() + 2)
+const invitations = computed(() => eventStore.invitations || [])
+
+const upcomingEvents = computed(() => {
+  return eventStore.events
+    .map((event) => ({
+      ...event,
+      guests: event.guests || [],
+    }))
+    .filter((event) => {
+      const eventDate = new Date(event.date)
+      return eventDate >= today
+    })
+})
 
 const events = computed(() => {
   return eventStore.events
@@ -254,5 +303,36 @@ const goToEvent = async (id: number) => {
 
 .custom-preview-button:hover .button-icon {
   background-color: #4a63d9;
+}
+
+.invitations-section h2 {
+  margin-bottom: -20px;
+}
+h2 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.event-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.guest-avatars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.additional-guests {
+  font-size: 14px;
+  color: #757575;
+}
+
+.all-guests {
+  font-size: 14px;
+  color: #42a5f5;
+  cursor: pointer;
 }
 </style>

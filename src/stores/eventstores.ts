@@ -18,12 +18,14 @@ interface Event {
   name: string
   date: string
   location: string
-  discription: string
+  description: string
   startTime: string
   endTime: string
   image: string
   guests: Guest[]
   memories: Memory[]
+  isInvitation?: boolean
+  sender?: string
 }
 
 export const useEventStore = defineStore('event', {
@@ -32,12 +34,12 @@ export const useEventStore = defineStore('event', {
       {
         id: 1,
         name: "Sarah's and John's Wedding",
-        date: '2025-01-30',
+        date: '2025-01-31',
         startTime: '9:00 AM',
         endTime: '11:00 PM',
         location: 'High Garden Hotel',
         image: 'src/assets/pic/wedding.jpg',
-        discription:
+        description:
           'Celebrate the union of this wonderful couple with an evening of love, joy, and unforgettable memories. Enjoy a beautiful ceremony, delightful reception, and heartfelt moments as we honor their special day. We look forward to sharing this magical occasion with you!',
         guests: [
           {
@@ -76,6 +78,12 @@ export const useEventStore = defineStore('event', {
             role: 'Bride’s family',
             avatar: 'src/assets/pic/avatar1.jpg',
           },
+          {
+            id: 7,
+            name: 'Thor',
+            role: 'groom’s family',
+            avatar: 'src/assets/pic/avatar2.jpg',
+          },
         ],
         memories: [
           { id: 1, type: 'image', url: '/assets/images/memory1.jpg' },
@@ -103,6 +111,22 @@ export const useEventStore = defineStore('event', {
         ],
       },
     ] as Event[],
+    invitations: [
+      {
+        id: 3,
+        name: 'Luca Everett’s Birthday Party',
+        date: '2024-08-16',
+        startTime: '6:00 PM',
+        endTime: '10:00 PM',
+        location: 'Harran Hall',
+        image: 'src/assets/pic/wedding.jpg',
+        description: 'Join us for an evening of fun and celebration!',
+        guests: [],
+        memories: [],
+        isInvitation: true,
+        sender: 'Dylan Miller',
+      },
+    ] as Event[],
   }),
   actions: {
     getEventById(id: number): Event | undefined {
@@ -114,6 +138,41 @@ export const useEventStore = defineStore('event', {
         const guest = event.guests.find((g) => g.id === guestId)
         if (guest) {
           guest.role = newRole
+        }
+      }
+    },
+    receiveInvitation(invite: Event) {
+      this.invitations.push(invite)
+    },
+    acceptInvitation(inviteId: number) {
+      const acceptedInvite = this.invitations.find((invite) => invite.id === inviteId)
+
+      if (acceptedInvite) {
+        acceptedInvite.isInvitation = false
+        this.events.push(acceptedInvite)
+        this.invitations = this.invitations.filter((invite) => invite.id !== inviteId)
+      }
+    },
+
+    declineInvitation(inviteId: number) {
+      this.invitations = this.invitations.filter((invite) => invite.id !== inviteId)
+    },
+
+    hideInvitation(inviteId: number) {
+      console.log(`Hiding invitation with ID: ${inviteId}`)
+    },
+    updateInvitationResponse(inviteId: number, going: boolean) {
+      const inviteIndex = this.invitations.findIndex((invite) => invite.id === inviteId)
+
+      if (inviteIndex !== -1) {
+        const invite = this.invitations[inviteIndex]
+
+        if (invite) {
+          if (going) {
+            invite.isInvitation = false
+            this.events.push(invite)
+          }
+          this.invitations.splice(inviteIndex, 1)
         }
       }
     },
