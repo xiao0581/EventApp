@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -14,7 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Event lib\Modules.EventLib.csproj" />
+    <ProjectReference Include="..\User lib\Modules.UserLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Modules.EventLib">
+      <HintPath>..\Event lib\bin\Debug\net8.0\Modules.EventLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using MongoDB.Bson;
-using Event_lib;
 using EversayApi.Data;
+using Event_lib;
 
 namespace EversayApi.Controllers
 {
