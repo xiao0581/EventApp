@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using MongoDB.Driver;
+using MongoDB.Bson;
+using Event_lib;
+using EversayApi.Data;
 
 namespace EversayApi.Controllers
 {
@@ -9,36 +10,77 @@ namespace EversayApi.Controllers
     [ApiController]
     public class EventController : ControllerBase
     {
-        // GET: api/<EventController>
+        private readonly IMongoCollection<Event>? _events;
+        public EventController(MongoDbService mongoDbService)
+        {
+            _events = mongoDbService.Database?.GetCollection<Event>("event");
+        }
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IEnumerable<Event>> GetAllEvents()
         {
-            return new string[] { "value1", "value2" };
+            return await _events.Find(FilterDefinition<Event>.Empty).ToListAsync();
         }
 
-        // GET api/<EventController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<Event?>> GetEventById(string id)
         {
-            return "value";
+            if (!ObjectId.TryParse(id, out var objectId))
+            {
+                return BadRequest("Invalid ID format");
+            }
+
+            var filter = Builders<Event>.Filter.Eq("eventId", id);
+            var foundEvent = _events.Find(filter).FirstOrDefault();
+            return foundEvent is not null ? Ok(foundEvent) : NotFound();
         }
 
-        // POST api/<EventController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult> CreateEvent(Event createdEvent, IFormFile eventCover)
         {
+            if (eventCover != null)
+            {
+                MemoryStream memoryStream = new MemoryStream();
+                eventCover.OpenReadStream().CopyTo(memoryStream);
+                createdEvent.EventImage = Convert.ToBase64String(memoryStream.ToArray());
+            }
+            else
+            {
+                createdEvent.EventImage = "";
+            }
+
+            createdEvent.CreatedAt = DateTime.UtcNow;
+            createdEvent.ExpiredAt = createdEvent.EventDate.AddDays(100);
+            await _events.InsertOneAsync(createdEvent);
+            return CreatedAtAction(nameof(GetEventById), new { id = createdEvent.eventId }, createdEvent);
         }
 
-        // PUT api/<EventController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut]
+        public async Task<ActionResult> UpdateEvent(Event updatedEvent)
         {
+            var filter = Builders<Event>.Filter.Eq("eventId", updatedEvent.eventId);
+            await _events.ReplaceOneAsync(filter, updatedEvent);
+            return Ok();
         }
 
-        // DELETE api/<EventController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> DeleteEvent(string id)
         {
+            if (!ObjectId.TryParse(id, out var objectId))
+            {
+                return BadRequest("Invalid ID format");
+            }
+
+            var filter = Builders<Event>.Filter.Eq("eventId", id);
+            var result = await _events.DeleteOneAsync(filter);
+
+            if (result.DeletedCount > 0)
+            {
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+            }
         }
     }
 }
