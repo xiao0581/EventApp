@@ -8,7 +8,6 @@ namespace EversayApi.Controllers
     public class UserController : Controller
     {
         private readonly IMongoCollection<User>? _users;
-
         public UserController(MongoDbService mongoDbServiceUser)
         {
             _users = mongoDbServiceUser.Database?.GetCollection<User>("user");

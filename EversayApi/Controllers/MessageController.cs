@@ -1,86 +1,54 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using MongoDB.Bson;
 using EversayApi.Data;
+using Message_lib;
 
 namespace EversayApi.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class MessageController : Controller
     {
-        // GET: HomeController
-        public ActionResult Index()
+        private const long maxAllowedSize = 10 * 1024 * 1024; //10MB, can be changed
+        private readonly IMongoCollection<Message>? _messages;
+        public MessageController(MongoDbService mongoDbService)
         {
-            return View();
+            _messages = mongoDbService.Database?.GetCollection<Message>("message");
         }
 
-        // GET: HomeController/Details/5
-        public ActionResult Details(int id)
+        [HttpGet("api/message/inbox")] //idea here is to have an inbox for each user/group that has sent a message
+        public async Task<IEnumerable<Message>> GetInboxMessages(string userId)
         {
-            return View();
+            var filter = Builders<Message>.Filter.Eq("receiver_id", userId);
+            return await _messages.Find(filter).ToListAsync();
         }
 
-        // GET: HomeController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: HomeController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> SendMessage(Message sentMessage, IFormFile msgAttachment)
         {
-            try
+            if (msgAttachment != null)
             {
-                return RedirectToAction(nameof(Index));
+                MemoryStream memoryStream = new MemoryStream();
+                msgAttachment.OpenReadStream().CopyTo(memoryStream); //need to change max file size but maxAllowedSize is not working for some reason
+                sentMessage.MessageAttachment = Convert.ToBase64String(memoryStream.ToArray());
             }
-            catch
+            else
             {
-                return View();
+                sentMessage.MessageAttachment = "";
             }
-        }
 
-        // GET: HomeController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
+            if (sentMessage.ReceiverId == null || sentMessage.SenderId == null)
+            {
+                return BadRequest("ReceiverId and SenderId are required");
+            }
 
-        // POST: HomeController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
+            if (sentMessage.MessageText == null && sentMessage.MessageAttachment == null)
             {
-                return RedirectToAction(nameof(Index));
+                return BadRequest("Message needs content");
             }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: HomeController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: HomeController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            sentMessage.MsgSentTime = DateTime.UtcNow;
+            await _messages.InsertOneAsync(sentMessage);
+            return Ok(sentMessage);
         }
     }
 }

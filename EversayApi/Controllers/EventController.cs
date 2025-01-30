@@ -15,6 +15,7 @@ namespace EversayApi.Controllers
         {
             _events = mongoDbService.Database?.GetCollection<Event>("event");
         }
+
         [HttpGet]
         public async Task<IEnumerable<Event>> GetAllEvents()
         {
@@ -32,6 +33,13 @@ namespace EversayApi.Controllers
             var filter = Builders<Event>.Filter.Eq("eventId", id);
             var foundEvent = _events.Find(filter).FirstOrDefault();
             return foundEvent is not null ? Ok(foundEvent) : NotFound();
+        }
+
+        [HttpGet("search/{title}")]
+        public async Task<IEnumerable<Event>> GetEventByTitle(string title)
+        {
+            var filter = Builders<Event>.Filter.Regex("event_title", new BsonRegularExpression(title, "i"));
+            return await _events.Find(filter).ToListAsync();
         }
 
         [HttpPost]
