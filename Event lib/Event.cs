@@ -24,6 +24,10 @@ namespace Event_lib
         [BsonElement("expired_at"), BsonRepresentation(BsonType.DateTime)]
         public DateTime ExpiredAt { get; set; }
 
+        [BsonElement("event_image"), BsonRepresentation(BsonType.String)]
         public string? EventImage { get; set; }
+
+        [BsonElement("event_location"), BsonRepresentation(BsonType.String)]
+        public string? EventLocation { get; set; }
     }
 }
