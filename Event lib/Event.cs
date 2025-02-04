@@ -29,5 +29,8 @@ namespace Event_lib
 
         [BsonElement("event_location"), BsonRepresentation(BsonType.String)]
         public string? EventLocation { get; set; }
+
+        [BsonElement("event_category"), BsonRepresentation(BsonType.String)]
+        public string? EventCategory { get; set; }
     }
 }

@@ -21,6 +21,7 @@ namespace User_lib
         [BsonElement("user_role"), BsonRepresentation(BsonType.String)]
         public UserType UserRole { get; set; } = UserType.Guest;
 
+        [BsonElement("profile_picture"), BsonRepresentation(BsonType.String)]
         public string? ProfilePicture { get; set; }
     }
     public enum UserType
