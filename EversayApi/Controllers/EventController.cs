@@ -52,7 +52,7 @@ namespace EversayApi.Controllers
                 createdEvent.EventImage = Convert.ToBase64String(memoryStream.ToArray());
             }
             else
-            { //copmmment
+            {
                 createdEvent.EventImage = "";
             }
 
