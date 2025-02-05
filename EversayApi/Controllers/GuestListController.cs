@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using MongoDB.Driver;
+using MongoDB.Bson;
+using EversayApi.Data;
+using GuestList_lib;
 
 namespace EversayApi.Controllers
 {
@@ -8,36 +10,53 @@ namespace EversayApi.Controllers
     [ApiController]
     public class GuestListController : ControllerBase
     {
-        // GET: api/<GuestListController>
+        private readonly IMongoCollection<GuestList>? _guestLists;
+        public GuestListController(MongoDbService mongoDbService)
+        {
+            _guestLists = mongoDbService.Database?.GetCollection<GuestList>("guestList");
+        }
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IEnumerable<GuestList>> GetAllGuestLists()
         {
-            return new string[] { "value1", "value2" };
+            return await _guestLists.Find(FilterDefinition<GuestList>.Empty).ToListAsync();
         }
 
-        // GET api/<GuestListController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public ActionResult<GuestList?> GetGuestListById(string id)
         {
-            return "value";
+            if (!ObjectId.TryParse(id, out var objectId))
+            {
+                return BadRequest("Invalid ID format");
+            }
+            var filter = Builders<GuestList>.Filter.Eq("guestListId", id);
+            var foundGuestList = _guestLists.Find(filter).FirstOrDefault();
+            return foundGuestList is not null ? Ok(foundGuestList) : NotFound();
         }
 
-        // POST api/<GuestListController>
+        [HttpGet("search/{title}")]
+        public async Task<IEnumerable<GuestList>> GetGuestListByTitle(string title)
+        {
+            var filter = Builders<GuestList>.Filter.Regex("guestList_title", new BsonRegularExpression(title, "i"));
+            return await _guestLists.Find(filter).ToListAsync();
+        }
+
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult> CreateGuestList(GuestList createdGuestList, IFormFile guestListCover)
         {
-        }
-
-        // PUT api/<GuestListController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<GuestListController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            if (guestListCover != null)
+            {
+                MemoryStream memoryStream = new MemoryStream();
+                guestListCover.OpenReadStream().CopyTo(memoryStream);
+                createdGuestList.GuestListImage = Convert.ToBase64String(memoryStream.ToArray());
+            }
+            else
+            {
+                createdGuestList.GuestListImage = "";
+            }
+            createdGuestList.CreatedAt = DateTime.UtcNow;
+            await _guestLists.InsertOneAsync(createdGuestList);
+            return Ok(createdGuestList);
         }
     }
 }
