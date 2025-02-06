@@ -26,6 +26,9 @@
     <Reference Include="Modules.EventLib">
       <HintPath>..\Event lib\bin\Debug\net8.0\Modules.EventLib.dll</HintPath>
     </Reference>
+    <Reference Include="Modules.GuestListLib">
+      <HintPath>..\Guest lib\bin\Debug\net9.0\Modules.GuestListLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
