@@ -45,7 +45,13 @@
     <div class="event-section">
       <h6>Our guests ({{ event?.guests.length || 0 }})</h6>
       <GuestListcompo v-if="event" :guests="limitedGuests" :grouped="false" />
-      <q-btn flat label="View all guests" class="show-more-btn" style="text-transform: none" />
+      <q-btn
+        flat
+        label="View all guests"
+        class="show-more-btn"
+        :to="`/event/${event?.id}/guests`"
+        style="text-transform: none"
+      />
     </div>
 
     <div class="event-section">
@@ -61,6 +67,7 @@
         />
       </div>
     </div>
+    <router-view />
   </q-page>
 </template>
 

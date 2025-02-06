@@ -34,6 +34,13 @@ const routes: RouteRecordRaw[] = [
         component: () => import('src/pages/HomePages/EventDetailPages/EventDetail.vue'),
         meta: { hideFooter: true },
       },
+
+      {
+        path: '/event/:id/guests',
+        name: 'GuestsList',
+        component: () => import('src/pages/HomePages/EventDetailPages/OurGuests.vue'),
+        meta: { hideFooter: true },
+      },
     ],
   },
 ]
