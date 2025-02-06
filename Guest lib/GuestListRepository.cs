@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Modules.GuestListLib
 {
-    internal class GuestListRepository
+    public class GuestListRepository
     {
     }
 }

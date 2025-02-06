@@ -18,7 +18,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Event lib\Modules.EventLib.csproj" />
+    <ProjectReference Include="..\Guest lib\Modules.GuestListLib.csproj" />
     <ProjectReference Include="..\Message lib\Modules.MessageLib.csproj" />
+    <ProjectReference Include="..\Modules.Auth\Modules.Auth.csproj" />
     <ProjectReference Include="..\User lib\Modules.UserLib.csproj" />
   </ItemGroup>
 

@@ -42,7 +42,7 @@ namespace EversayApi.Controllers
             return await _events.Find(filter).ToListAsync();
         }
 
-        [HttpGet] //might want to change this to a different route
+        [HttpGet("orderbydate")] //might want to change this to a different route
         public async Task<IEnumerable<Event>> OrderByDateAsc(DateTime date)
         {
             var filter = Builders<Event>.Filter.Gt("event_date", date);
