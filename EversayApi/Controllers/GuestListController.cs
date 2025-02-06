@@ -2,7 +2,8 @@
 using MongoDB.Driver;
 using MongoDB.Bson;
 using EversayApi.Data;
-using Modules.GuestListLib;
+using GuestList_lib;
+
 namespace EversayApi.Controllers
 {
     [Route("api/[controller]")]
