@@ -3,11 +3,13 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using EversayApi.Data;
 using Event_lib;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EversayApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EventController : ControllerBase
     {
         private readonly IMongoCollection<Event>? _events;

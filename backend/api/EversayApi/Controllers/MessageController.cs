@@ -2,11 +2,13 @@
 using MongoDB.Driver;
 using EversayApi.Data;
 using Message_lib;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EversayApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MessageController : Controller
     {
         private const long maxAllowedSize = 10 * 1024 * 1024; //10MB, can be changed
