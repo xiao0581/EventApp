@@ -10,7 +10,7 @@
         <q-list>
           <q-card v-for="guest in group" :key="guest.id" class="q-mb-md q-pa-sm">
             <q-card-section class="row items-center">
-              <q-avatar size="50px" class="q-mr-sm">
+              <q-avatar size="80px" class="q-mr-sm">
                 <q-img :src="guest.avatar || '/assets/images/default-avatar.png'" />
               </q-avatar>
 
@@ -28,7 +28,7 @@
     <template v-else>
       <q-card v-for="guest in guests" :key="guest.id" class="q-mb-md q-pa-sm">
         <q-card-section class="row items-center">
-          <q-avatar size="50px" class="q-mr-sm">
+          <q-avatar size="70px" class="q-mr-sm">
             <q-img :src="guest.avatar || '/assets/images/default-avatar.png'" />
           </q-avatar>
 
@@ -86,5 +86,22 @@ const sendMessage = (guest: Guest) => {
 .q-card {
   border-radius: 20px;
   box-shadow: none;
+  margin: 12px 12px;
+  padding: 1px;
+}
+
+.text-weight-medium {
+  margin-top: -10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.tag-button {
+  font-size: 10px;
+  padding: 2px 6px;
+  height: 22px;
+  min-width: 60px;
+  border: 1px solid #98a4dd;
+  color: #4a4a4a;
 }
 </style>

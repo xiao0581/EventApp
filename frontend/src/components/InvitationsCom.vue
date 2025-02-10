@@ -47,59 +47,68 @@ const hideInvite = (id: number) => {
 <style scoped>
 .invitations-section {
   margin: 20px;
-  border-radius: 30px;
+  padding: 10px;
+  border-radius: 20px;
+  max-height: 350px;
+  overflow-y: auto;
 }
 
-h2 {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
+.invitation-header p {
+  font-size: 20px;
 }
 
 .invitation-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: transform 0.2s ease-in-out;
-  padding: 16px;
-}
-
-.invitation-card:hover {
-  transform: translateY(-5px);
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 10px;
 }
 
 .invitation-content {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .invitation-image-container {
   flex: 1;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .invitation-image {
   width: 100%;
-  height: 150px;
+  height: 100px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 20px;
 }
 
 .invitation-details {
   flex: 2;
+  margin-top: -30px;
 }
 
 .event-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
+}
+
+.invitation-details p {
+  font-size: 12px;
+  margin: 1px 0;
 }
 
 .invitation-actions {
   display: flex;
-  gap: 10px;
+  gap: 5px;
   margin-top: 10px;
+  justify-content: space-between;
+}
+
+.q-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 12px;
+  min-width: 80px;
+  border-radius: 20px;
 }
 </style>
