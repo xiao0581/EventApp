@@ -116,7 +116,7 @@ namespace EversayApi.Controllers
                 var roleClaims = roles.Select(x => new Claim(ClaimTypes.Role, x));
                 claims.AddRange(roleClaims);
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("2Hf73Nfk002bc9/J"));
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("d2f8b7e3a6c9f4d5e8f2c7b9a3d4e6f7c8b2a5f9d3e7c6b4a8f1d9e3b5c7a6f4\r\n"));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
                 var expires = DateTime.Now.AddHours(24);
 
