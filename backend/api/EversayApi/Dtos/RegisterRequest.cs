@@ -1,0 +1,16 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EversayApi.Dtos
+{
+    public class RegisterRequest
+    {
+        [Required, EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        [Required, DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+        [Required, DataType(DataType.Password), Compare(nameof(Password), ErrorMessage = "Wrong password entered")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.Identity.MongoDbCore" Version="3.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+    <PackageReference Include="MongoDB.Bson" Version="2.30.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.30.0" />
+    <PackageReference Include="MongoDB.Driver.Core" Version="2.30.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Event lib\Modules.EventLib.csproj" />
+    <ProjectReference Include="..\Guest lib\Modules.GuestListLib.csproj" />
+    <ProjectReference Include="..\Message lib\Modules.MessageLib.csproj" />
+    <ProjectReference Include="..\Modules.Auth\Modules.Auth.csproj" />
+    <ProjectReference Include="..\User lib\Modules.UserLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Modules.EventLib">
+      <HintPath>..\Event lib\bin\Debug\net8.0\Modules.EventLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Modules.GuestListLib">
+      <HintPath>..\Guest lib\bin\Debug\net9.0\Modules.GuestListLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
