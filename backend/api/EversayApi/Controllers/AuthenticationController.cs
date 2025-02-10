@@ -55,6 +55,7 @@ namespace EversayApi.Controllers
                     Email = request.Email,
                     ConcurrencyStamp = Guid.NewGuid().ToString(),
                     UserName = request.Email,
+                    TwoFactorEnabled = false,
                 };
                 var createUserResult = await _userManager.CreateAsync(userExists, request.Password);
                 if (!createUserResult.Succeeded) return new RegisterResponse
