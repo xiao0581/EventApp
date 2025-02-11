@@ -8,6 +8,17 @@
       <q-card-section>
         <q-form @submit.prevent="handleRegister" class="form-container">
           <q-input
+            v-model="email"
+            label="Email"
+            type="email"
+            outlined
+            rounded
+            required
+            label-color="primary"
+            style="width: 100%; max-width: 350px"
+            :rules="[(val) => !!val || 'Email is required']"
+          />
+          <q-input
             v-model="username"
             label="Username"
             outlined
@@ -31,15 +42,15 @@
           />
 
           <q-input
-            v-model="email"
-            label="Email"
-            type="email"
+            v-model="confirmPassword"
+            label="Confirm Password"
+            type="password"
             outlined
             rounded
             required
             label-color="primary"
             style="width: 100%; max-width: 350px"
-            :rules="[(val) => !!val || 'Email is required']"
+            :rules="[(val) => !!val || 'Password is required']"
           />
 
           <q-btn
@@ -69,6 +80,7 @@ import { Notify } from 'quasar'
 const username = ref<string>('')
 const password = ref<string>('')
 const email = ref<string>('')
+const confirmPassword = ref<string>('')
 const loading = ref<boolean>(false)
 
 const authStore = useAuthStore()
@@ -80,6 +92,7 @@ const handleRegister = async (): Promise<void> => {
       username: username.value,
       password: password.value,
       email: email.value,
+      confirmPassword: confirmPassword.value,
     })
 
     Notify.create({

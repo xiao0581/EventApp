@@ -8,7 +8,7 @@
       <q-card-section>
         <q-form @submit.prevent="handleLogin" class="form-container">
           <q-input
-            v-model="username"
+            v-model="email"
             label="Username"
             outlined
             required
@@ -54,7 +54,7 @@ import { useAuthStore } from 'src/stores/auth'
 import { useRouter } from 'vue-router'
 import { Notify } from 'quasar'
 
-const username = ref<string>('')
+const email = ref<string>('')
 const password = ref<string>('')
 const loading = ref<boolean>(false)
 
@@ -65,14 +65,14 @@ const router = useRouter()
 const handleLogin = async (): Promise<void> => {
   loading.value = true
   try {
-    await authStore.login({ username: username.value, password: password.value })
+    await authStore.login({ email: email.value, password: password.value })
 
     Notify.create({
       type: 'positive',
       message: 'Login successful!',
     })
 
-    await router.push('/')
+    await router.push('/home')
   } catch (error: unknown) {
     const message = (error as Error).message || 'An unknown error occurred.'
     Notify.create({
