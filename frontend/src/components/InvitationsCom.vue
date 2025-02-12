@@ -6,7 +6,7 @@
       </div>
       <div class="invitation-content">
         <div class="invitation-image-container">
-          <q-img :src="invite.image" alt="Invitation image" class="invitation-image" />
+          <q-img src="src/assets/pic/luca.jpg" alt="Invitation image" class="invitation-image" />
         </div>
 
         <div class="invitation-details">
@@ -46,8 +46,8 @@ const hideInvite = (id: number) => {
 
 <style scoped>
 .invitations-section {
-  margin: 20px;
-  padding: 10px;
+  margin: 10px 12px;
+  padding: 5px;
   border-radius: 20px;
   max-height: 350px;
   overflow-y: auto;

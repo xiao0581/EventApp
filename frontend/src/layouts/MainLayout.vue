@@ -72,6 +72,8 @@ const isActive = (path: string): boolean => {
   align-items: center;
   justify-content: center;
   bottom: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .custom-toolbar {

@@ -27,7 +27,14 @@
               >+{{ event.guests.length - 5 }}</span
             >
           </div>
-          <p class="all-guests">View all guests ></p>
+          <q-btn
+            flat
+            label="View all guests"
+            class="all-guests"
+            :to="`/event/${event?.id}/guests`"
+            style="text-transform: none"
+            @click.stop
+          />
         </div>
         <div class="custom-preview-button">
           <span class="button-text">Catch the celebration vibe with a quick preview</span>
@@ -46,33 +53,7 @@
 
   <div class="upcoming-events-section">
     <h2>Upcoming Events</h2>
-    <div
-      class="event-card"
-      v-for="event in upcomingEvents"
-      :key="event.id"
-      @click="goToEvent(event.id)"
-    >
-      <div class="event-card-image">
-        <q-img :src="event.image" alt="Event image" />
-      </div>
-      <div class="event-card-content">
-        <h5 class="event-title">{{ event.name }}</h5>
-        <p><q-icon name="schedule" /> {{ event.startTime }} | {{ event.date }}</p>
-        <p><q-icon name="place" /> {{ event.location }}</p>
-
-        <div class="event-guests">
-          <div class="guest-avatars">
-            <q-avatar v-for="guest in event.guests.slice(0, 5)" :key="guest.id" size="32px">
-              <q-img :src="guest.avatar" alt="Guest avatar" />
-            </q-avatar>
-            <span class="additional-guests" v-if="event.guests.length > 5">
-              +{{ event.guests.length - 5 }}
-            </span>
-          </div>
-          <p class="all-guests">View all guests ></p>
-        </div>
-      </div>
-    </div>
+    <UpcomingEvent />
   </div>
 </template>
 
@@ -81,6 +62,7 @@ import { computed } from 'vue'
 import { useEventStore } from 'src/stores/eventstores'
 import { useRouter } from 'vue-router'
 import InvitationsCompo from 'src/components/InvitationsCom.vue'
+import UpcomingEvent from 'src/components/UpcomingEvent.vue'
 
 const eventStore = useEventStore()
 const router = useRouter()
@@ -88,18 +70,6 @@ const today = new Date()
 const dayAfterTomorrow = new Date()
 dayAfterTomorrow.setDate(today.getDate() + 2)
 const invitations = computed(() => eventStore.invitations || [])
-
-const upcomingEvents = computed(() => {
-  return eventStore.events
-    .map((event) => ({
-      ...event,
-      guests: event.guests || [],
-    }))
-    .filter((event) => {
-      const eventDate = new Date(event.date)
-      return eventDate >= today
-    })
-})
 
 const events = computed(() => {
   return eventStore.events
@@ -165,7 +135,8 @@ const goToEvent = async (id: number) => {
 }
 
 .events-section {
-  margin: 20px;
+  margin: 0 2px;
+  padding: 0 10px;
 }
 
 .events-section h2 {
@@ -183,10 +154,6 @@ const goToEvent = async (id: number) => {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
-}
-
-.event-card:hover {
-  transform: translateY(-5px);
 }
 
 .event-card-image {
@@ -242,6 +209,7 @@ const goToEvent = async (id: number) => {
 .guest-avatars {
   display: flex;
   align-items: center;
+  gap: 4px;
 }
 
 .q-avatar {
@@ -252,12 +220,6 @@ const goToEvent = async (id: number) => {
   margin-left: 8px;
   font-size: 14px;
   color: #757575;
-}
-
-.all-guests {
-  font-size: 14px;
-  color: #42a5f5;
-  cursor: pointer;
 }
 
 .custom-preview-button {
@@ -313,26 +275,13 @@ h2 {
   margin-bottom: 10px;
 }
 
-.event-title {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.guest-avatars {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.additional-guests {
-  font-size: 14px;
-  color: #757575;
-}
-
 .all-guests {
-  font-size: 14px;
+  font-size: 11px;
   color: #42a5f5;
   cursor: pointer;
+}
+
+.upcoming-events-section h2 {
+  margin-bottom: -20px;
 }
 </style>
