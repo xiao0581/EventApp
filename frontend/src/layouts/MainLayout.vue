@@ -36,7 +36,7 @@
         <q-btn
           flat
           icon="sym_o_person"
-          to="/"
+          to="/profile"
           class="toolbar-btn"
           :class="{ 'active-btn': isActive('/MainLoginView') }"
         />
@@ -48,8 +48,13 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-
+import { onMounted } from 'vue'
+import { useAuthStore } from 'src/stores/auth'
+const authStore = useAuthStore()
 const route = useRoute()
+onMounted(() => {
+  authStore.loadUser()
+})
 const hideFooter = computed(() => route.meta.hideFooter)
 const isActive = (path: string): boolean => {
   return route.path === path
@@ -67,6 +72,8 @@ const isActive = (path: string): boolean => {
   align-items: center;
   justify-content: center;
   bottom: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .custom-toolbar {

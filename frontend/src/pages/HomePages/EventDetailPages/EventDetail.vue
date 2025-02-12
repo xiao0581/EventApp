@@ -48,25 +48,12 @@
       <q-btn
         flat
         label="View all guests"
-        class="show-more-btn"
+        class="View-more-btn"
         :to="`/event/${event?.id}/guests`"
         style="text-transform: none"
       />
     </div>
 
-    <div class="event-section">
-      <h2></h2>
-      <div class="memories-grid">
-        <q-img
-          v-for="memory in event?.memories"
-          :key="memory.id"
-          :src="memory.url"
-          :alt="memory.type"
-          class="memory-item"
-          @click="viewMemory(memory)"
-        />
-      </div>
-    </div>
     <router-view />
   </q-page>
 </template>
@@ -93,10 +80,6 @@ const isDescriptionExpanded = ref(false)
 
 const toggleDescription = () => {
   isDescriptionExpanded.value = !isDescriptionExpanded.value
-}
-
-const viewMemory = (memory: { id: number; type: string; url: string }) => {
-  alert(`Viewing memory: ${memory.url}`)
 }
 
 onMounted(() => {
@@ -187,9 +170,6 @@ onMounted(() => {
   font-weight: bold;
   margin-top: 30px;
 }
-.event-section {
-  margin: 16px;
-}
 
 .event-section h6 {
   margin-bottom: 10px;
@@ -200,19 +180,6 @@ onMounted(() => {
   margin-bottom: 12px;
 }
 
-.memories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 8px;
-}
-
-.memory-item {
-  width: 100%;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 8px;
-  cursor: pointer;
-}
 .event-header h1 {
   position: absolute;
   margin: 8px 0;
@@ -231,5 +198,9 @@ onMounted(() => {
   box-shadow: none;
   border: none;
   padding: 0;
+}
+
+.View-more-btn {
+  margin-left: 120px;
 }
 </style>

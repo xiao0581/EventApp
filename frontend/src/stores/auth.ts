@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 interface User {
   username: string
+  email: string
   token: string
 }
 
@@ -15,12 +16,22 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   actions: {
-    async login(credentials: { username: string; password: string }): Promise<void> {
+    loadUser(): void {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        this.user = JSON.parse(storedUser)
+      }
+    },
+
+    async login(credentials: { email: string; password: string }): Promise<void> {
       try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('http://localhost:5102/api/v1/authenticate/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(credentials),
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password,
+          }),
         })
 
         if (!response.ok) {
@@ -30,9 +41,11 @@ export const useAuthStore = defineStore('auth', {
         const data = await response.json()
 
         this.user = {
-          username: data.username,
-          token: data.token,
+          username: data.userId,
+          email: data.email,
+          token: data.accessToken,
         }
+        localStorage.setItem('user', JSON.stringify(this.user))
       } catch (error) {
         if (error instanceof Error) {
           throw new Error(error.message || 'Failed to login')
@@ -45,19 +58,18 @@ export const useAuthStore = defineStore('auth', {
     async register(credentials: {
       username: string
       password: string
+      confirmPassword: string
       email: string
     }): Promise<void> {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const response = await fetch('http://localhost:5102/api/v1/authenticate/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(credentials),
+        })
 
-        const mockResponse = {
-          username: credentials.username,
-          token: 'mock-token-12345',
-        }
-
-        this.user = {
-          username: mockResponse.username,
-          token: mockResponse.token,
+        if (!response.ok) {
+          throw new Error('Registration failed')
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -70,6 +82,7 @@ export const useAuthStore = defineStore('auth', {
 
     logout(): void {
       this.user = null
+      localStorage.removeItem('user')
     },
 
     isAuthenticated(): boolean {

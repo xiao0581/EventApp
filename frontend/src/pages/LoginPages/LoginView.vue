@@ -1,5 +1,7 @@
 <template>
   <q-page class="flex flex-center">
+    <q-btn flat round icon="arrow_back_ios" color="primary" class="back-btn" to="/emaillogin" />
+    <q-img src="src/assets/pic/logo1.png" class="logo"></q-img>
     <q-card class="q-pa-md">
       <q-card-section>
         <div class="text-h6">Login</div>
@@ -8,7 +10,7 @@
       <q-card-section>
         <q-form @submit.prevent="handleLogin" class="form-container">
           <q-input
-            v-model="username"
+            v-model="email"
             label="Username"
             outlined
             required
@@ -54,7 +56,7 @@ import { useAuthStore } from 'src/stores/auth'
 import { useRouter } from 'vue-router'
 import { Notify } from 'quasar'
 
-const username = ref<string>('')
+const email = ref<string>('')
 const password = ref<string>('')
 const loading = ref<boolean>(false)
 
@@ -65,14 +67,15 @@ const router = useRouter()
 const handleLogin = async (): Promise<void> => {
   loading.value = true
   try {
-    await authStore.login({ username: username.value, password: password.value })
+    await authStore.login({ email: email.value, password: password.value })
 
     Notify.create({
       type: 'positive',
       message: 'Login successful!',
+      timeout: 1000,
     })
 
-    await router.push('/')
+    await router.push('/home')
   } catch (error: unknown) {
     const message = (error as Error).message || 'An unknown error occurred.'
     Notify.create({
@@ -88,9 +91,9 @@ const handleLogin = async (): Promise<void> => {
 <style scoped>
 .q-page {
   min-height: 100vh;
-  background-image: url('src/assets/pic/login.jpg');
-  background-size: cover;
-  background-position: center;
+  background-image: url('src/assets/pic/loginHores.png');
+  background-size: 90%;
+  background-position: bottom;
   background-repeat: no-repeat;
   height: 100vh;
   margin: 0;
@@ -100,7 +103,7 @@ const handleLogin = async (): Promise<void> => {
 }
 
 .q-card {
-  margin-top: 200px;
+  margin-bottom: 210px;
   border-radius: 20px;
   width: 350px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -125,5 +128,19 @@ const handleLogin = async (): Promise<void> => {
 .q-btn {
   width: 100%;
   max-width: 250px;
+}
+.logo {
+  width: 150px;
+  margin-top: 50px;
+}
+.back-btn {
+  position: absolute;
+  top: 16px;
+  left: -90px;
+  z-index: 10;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
 }
 </style>
