@@ -12,6 +12,11 @@ const routes: RouteRecordRaw[] = [
         meta: { hideFooter: true },
       },
       {
+        path: '/emaillogin',
+        component: () => import('src/pages/LoginPages/EmailLoginview.vue'),
+        meta: { hideFooter: true },
+      },
+      {
         path: '/login',
         component: () => import('src/pages/LoginPages/LoginView.vue'),
         meta: { hideFooter: true },

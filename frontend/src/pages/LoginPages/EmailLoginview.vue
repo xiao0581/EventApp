@@ -1,5 +1,6 @@
 <template>
   <q-page class="flex flex-center">
+    <q-btn flat round icon="arrow_back_ios" color="primary" class="back-btn" to="/MainLoginView" />
     <div class="content">
       <q-img src="src/assets/pic/logo1.png" class="logo"></q-img>
 
@@ -8,20 +9,14 @@
         <p>Experience effortless event planning and create lasting memories together</p>
       </div>
       <div class="button-group">
-        <q-btn unelevated class="login-option google-btn">
-          <q-icon name="img:/src/assets/pic/google.png" size="20px" />
-          <span>Continue with Google</span>
-        </q-btn>
-
-        <q-btn unelevated class="login-option apple-btn">
-          <q-icon name="img:/src/assets/pic/apple.png" size="20px" />
-          <span>Continue with Apple</span>
-        </q-btn>
-
-        <q-btn unelevated class="login-option email-btn" to="/emaillogin">
-          <q-icon name="mail" size="20px" />
-          <span>Continue with Email</span>
-        </q-btn>
+        <q-btn label="LOG IN" color="primary" class="login-btn" to="/login" />
+        <q-btn
+          label="SIGN UP"
+          color="secondary"
+          text-color="primary"
+          to="/registers"
+          class="register-btn"
+        />
       </div>
     </div>
   </q-page>
@@ -79,7 +74,7 @@
   display: flex;
   justify-content: center;
   width: 300px;
-  margin-left: 50px;
+  margin-left: 100px;
   margin-top: 0px;
   flex-direction: column;
   gap: 20px;
@@ -91,33 +86,15 @@
 .login-btn {
   width: 200px;
 }
-.login-option {
-  width: 100%;
-  height: 45px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
 
-.google-btn {
-  background: white;
-  border: 1px solid #ccc;
-  color: black;
-}
-
-.apple-btn {
-  background: white;
-  border: 1px solid #ccc;
-  color: black;
-}
-
-.email-btn {
-  background: white;
-  border: 1px solid #ccc;
-  color: black;
+.back-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
 }
 </style>
