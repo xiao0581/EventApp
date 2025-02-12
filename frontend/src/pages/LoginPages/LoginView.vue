@@ -72,6 +72,7 @@ const handleLogin = async (): Promise<void> => {
     Notify.create({
       type: 'positive',
       message: 'Login successful!',
+      timeout: 1000,
     })
 
     await router.push('/home')
