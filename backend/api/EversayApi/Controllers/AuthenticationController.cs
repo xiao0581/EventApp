@@ -121,8 +121,8 @@ namespace EversayApi.Controllers
                 var expires = DateTime.Now.AddHours(24);
 
                 var token = new JwtSecurityToken(
-                    issuer: "https://localhost:5001",
-                    audience: "https://localhost:5001",
+                    issuer: "http://localhost:5102",
+                    audience: "http://localhost:5102",
                     claims: claims,
                     expires: expires,
                     signingCredentials: creds
