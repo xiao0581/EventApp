@@ -91,13 +91,14 @@ const handleLogin = async (): Promise<void> => {
 <style scoped>
 .q-page {
   min-height: 100vh;
-  background-image: url('src/assets/pic/loginHores.png');
-  background-size: 90%;
-  background-position: bottom;
+  background-image: url('src/assets/pic/login.jpg');
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
   height: 100vh;
   margin: 0;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -121,6 +122,9 @@ const handleLogin = async (): Promise<void> => {
 .form-container {
   display: flex;
   flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 12px;
   align-items: center;
 }

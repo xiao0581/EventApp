@@ -27,21 +27,17 @@
 <style scoped>
 .q-page {
   min-height: 100vh;
-  background-image: url('src/assets/pic/loginHores.png');
-  background-size: 90%;
+  background-image: url('src/assets/pic/login.jpg');
+  background-size: cover;
+  background-position: center;
   background-color: #ebedff;
-  background-position: bottom;
+
   background-repeat: no-repeat;
   height: 100vh;
   margin: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.content {
-  margin-bottom: 350px;
-  text-align: center;
 }
 
 .logo {
@@ -62,6 +58,7 @@
   font-size: 30px;
   font-weight: bold;
   margin-bottom: 5px;
+  color: white;
 }
 .title p {
   font-size: 18px;
@@ -69,17 +66,27 @@
   width: 80%;
   max-width: 100%;
   margin-bottom: 20px;
-}
-.button-group {
-  display: flex;
-  justify-content: center;
-  width: 300px;
-  margin-left: 100px;
-  margin-top: 0px;
-  flex-direction: column;
-  gap: 20px;
+  color: white;
 }
 
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 300px;
+  gap: 20px;
+}
 .register-btn {
   width: 200px;
 }
