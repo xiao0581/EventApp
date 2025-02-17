@@ -52,15 +52,10 @@ namespace EversayApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateEvent(Event createdEvent, IFormFile eventCover)
+        public async Task<ActionResult> CreateEvent(Event createdEvent)
         {
-            if (eventCover != null)
-            {
-                MemoryStream memoryStream = new MemoryStream();
-                eventCover.OpenReadStream().CopyTo(memoryStream);
-                createdEvent.EventImage = Convert.ToBase64String(memoryStream.ToArray());
-            }
-            else
+            //assuming EventImage is already a base64 string in the createdEvent object
+            if (string.IsNullOrEmpty(createdEvent.EventImage))
             {
                 createdEvent.EventImage = "";
             }
