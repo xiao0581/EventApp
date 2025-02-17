@@ -43,7 +43,7 @@ builder.Services.AddAuthentication(x =>
     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(x =>
 {
-    x.RequireHttpsMetadata = true;
+    x.RequireHttpsMetadata = false;
     x.SaveToken = true;
     x.TokenValidationParameters = new TokenValidationParameters
     {
@@ -53,21 +53,40 @@ builder.Services.AddAuthentication(x =>
         ValidateLifetime = true,
         ValidIssuer = "http://localhost:5102",
         ValidAudience = "http://localhost:5102",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("d2f8b7e3a6c9f4d5e8f2c7b9a3d4e6f7c8b2a5f9d3e7c6b4a8f1d9e3b5c7a6f4\r\n")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("d2f8b7e3a6c9f4d5e8f2c7b9a3d4e6f7c8b2a5f9d3e7c6b4a8f1d9e3b5c7a6f4")),
         ClockSkew = TimeSpan.Zero,
     };
     x.Events = new JwtBearerEvents
     {
-        OnAuthenticationFailed = context =>
-        {
-            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
-            return Task.CompletedTask;
-        },
         OnChallenge = context =>
         {
-            Console.WriteLine($"Token validation failed: {context.ErrorDescription}");
-            return Task.CompletedTask;
+            context.HandleResponse();
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+
+            var error = context.Error ?? "invalid_token";
+            var errorDescription = context.ErrorDescription;
+
+            if (string.IsNullOrEmpty(errorDescription))
+            {
+                errorDescription = "The token is invalid or has expired";
+                if (context.AuthenticateFailure != null)
+                {
+                    if (context.AuthenticateFailure is SecurityTokenExpiredException expiredException)
+                    {
+                        errorDescription = $"The token expired on {expiredException.Expires:o}";
+                    }
+                    else
+                    {
+                        errorDescription = "Authentication failed: " + context.AuthenticateFailure.Message;
+                    }
+                }
+            }
+
+            var response = new { error, error_description = errorDescription };
+            return context.Response.WriteAsJsonAsync(response);
         }
+
     };
 });
 
