@@ -1,7 +1,7 @@
 <template>
   <div class="homecontainer">
     <p class="hometitle">Warm memories start here.</p>
-    <q-btn class="homebutton" unelevated rounded label="+ Create an event" />
+    <q-btn class="homebutton" to="/EventForm" unelevated rounded label="+ Create an event" />
   </div>
 
   <div class="events-section">

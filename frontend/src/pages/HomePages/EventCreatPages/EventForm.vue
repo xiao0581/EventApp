@@ -1,0 +1,289 @@
+<template>
+  <q-btn v-if="step === 1" flat class="back-btn" icon="arrow_back_ios" to="/home"></q-btn>
+  <q-page class="event-page">
+    <div class="header">
+      <div class="title">
+        {{ stepTitle }}
+      </div>
+
+      <q-linear-progress :value="progress" :color="progressColor" class="progress-bar" />
+    </div>
+
+    <div class="content">
+      <div v-if="step === 1">
+        <div class="section-title">Create warm memories</div>
+
+        <div class="input-label">Select Event Poster</div>
+        <div class="Poster">
+          <q-file
+            class="file-input"
+            v-model="eventPoster"
+            label="Tap to open the gallery"
+            accept="image/*"
+            borderless
+            @update:model-value="updatePosterPreview"
+          />
+          <img v-if="posterPreviewUrl" :src="posterPreviewUrl" class="preview-image" />
+        </div>
+
+        <div class="input-label">Add Event Preview</div>
+        <div class="Preview">
+          <q-file
+            class="file-input"
+            v-model="eventPreview"
+            label="Tap to open the gallery"
+            accept="video/*"
+            borderless
+            @update:model-value="updatePreviewVideo"
+          />
+          <video v-if="previewVideoUrl" class="preview-video" controls>
+            <source :src="previewVideoUrl" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="input-label">Event Date</div>
+        <div class="EventDate" style="max-width: 300px">
+          <q-input filled v-model="date">
+            <template v-slot:prepend>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-date v-model="date" mask="YYYY-MM-DD HH:mm">
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+
+            <template v-slot:append>
+              <q-icon name="access_time" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-time v-model="date" mask="YYYY-MM-DD HH:mm" format24h>
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-time>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </div>
+        <div class="input-label">Event name</div>
+        <q-input v-model="eventname" label="please enter event name" filled class="q-mt-md" />
+        <div class="input-label">Location</div>
+        <q-input v-model="eventLocation" label="please enter location" filled class="q-mt-md" />
+        <div class="input-label">Event description</div>
+        <q-input v-model="description" label="please enter description" filled class="q-mt-md" />
+      </div>
+
+      <div v-if="step === 2">
+        <div class="section-title">Who will help create warm memories</div>
+        <q-input v-model="hostEmail" label="Enter host email" filled class="q-mt-md" />
+        <q-btn label="Add Host" color="primary" class="btn" @click="addHost" />
+      </div>
+
+      <div v-if="step === 3">
+        <div class="section-title">Who will be part of your warm moments</div>
+        <q-btn label="Upload guests list" outline class="btn" @click="uploadGuestList" />
+        <q-btn label="Select from contact book" outline class="btn" />
+        <q-btn label="Add manually" outline class="btn" @click="addGuestManually" />
+      </div>
+    </div>
+
+    <div class="footer" :class="{ 'footer-right': step === 1, 'footer-default': step > 1 }">
+      <q-btn v-if="step > 1" label="Back" outline @click="prevStep" />
+
+      <q-btn v-if="step === 1" label="Next" color="primary" class="btn-large" @click="nextStep" />
+
+      <q-btn v-if="step > 1" label="Next" color="primary" :disable="step === 3" @click="nextStep" />
+    </div>
+  </q-page>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const eventPoster = ref<File | null>(null)
+const eventPreview = ref<File | null>(null)
+const hostEmail = ref<string>('')
+const guests = ref<string[]>([])
+const step = ref<number>(1)
+const posterPreviewUrl = ref<string | null>(null)
+const previewVideoUrl = ref<string | null>(null)
+const date = ref<string>('')
+const eventLocation = ref<string>('')
+const eventname = ref<string>('')
+const description = ref<string>('')
+const updatePosterPreview = (file: File | null) => {
+  if (file) {
+    posterPreviewUrl.value = URL.createObjectURL(file)
+  } else {
+    posterPreviewUrl.value = null
+  }
+}
+
+const updatePreviewVideo = (file: File | null) => {
+  if (file) {
+    previewVideoUrl.value = URL.createObjectURL(file)
+  } else {
+    previewVideoUrl.value = null
+  }
+}
+
+const stepTitle = computed(() => {
+  return step.value === 1
+    ? '1 of 3: Event details'
+    : step.value === 2
+      ? '2 of 3: Event host'
+      : '3 of 3: Event guests'
+})
+
+const progressColor = computed(() => 'blue')
+
+const progress = computed(() => {
+  return step.value === 1 ? 0.33 : step.value === 2 ? 0.66 : 1
+})
+
+const addHost = () => {
+  if (hostEmail.value) {
+    console.log('Added host:', hostEmail.value)
+  }
+}
+
+const uploadGuestList = () => {
+  console.log('Uploading guest list...')
+}
+
+const addGuestManually = () => {
+  const guestName = prompt('Enter guest name:')
+  if (guestName) {
+    guests.value.push(guestName)
+  }
+}
+
+const nextStep = () => {
+  if (step.value < 3) step.value++
+}
+
+const prevStep = () => {
+  if (step.value > 1) step.value--
+}
+</script>
+
+<style scoped>
+.event-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.header {
+  width: 100%;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+}
+
+.content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  padding-top: 20px;
+}
+.section-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.input-label {
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
+
+.Poster,
+.Preview {
+  position: relative;
+  border: 2px dashed #8c8c8c;
+  padding: 10px;
+  width: 100%;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+}
+
+.file-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.preview-image,
+.preview-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.EventDate {
+  margin-top: 15px;
+}
+.footer {
+  width: 100%;
+  display: flex;
+  padding: 20px;
+}
+
+.footer-right {
+  justify-content: flex-end;
+}
+
+.footer-default {
+  justify-content: space-between;
+}
+
+.btn-large {
+  font-size: 1rem;
+  width: 160px;
+}
+.btn {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.back-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+}
+</style>

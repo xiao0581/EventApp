@@ -53,6 +53,13 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
+        path: '/EventForm',
+        name: 'EventForm',
+        component: () => import('src/pages/HomePages/EventCreatPages/EventForm.vue'),
+        meta: { hideFooter: true, requiresAuth: true },
+      },
+
+      {
         path: '/event/:id',
         name: 'EventDetail',
         component: () => import('src/pages/HomePages/EventDetailPages/EventDetail.vue'),

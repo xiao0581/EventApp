@@ -34,7 +34,7 @@ export const useEventStore = defineStore('event', {
       {
         id: 1,
         name: "Sarah's and John's Wedding",
-        date: '2025-02-14',
+        date: '2025-02-19',
         startTime: '9:00 AM',
         endTime: '11:00 PM',
         location: 'High Garden Hotel',
