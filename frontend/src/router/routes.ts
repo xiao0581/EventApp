@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/MainLoginView',
+    redirect: '/home',
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
@@ -21,6 +21,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('src/pages/LoginPages/LoginView.vue'),
         meta: { hideFooter: true },
       },
+
       {
         path: '/registers',
         component: () => import('src/pages/LoginPages/RegistersView.vue'),
