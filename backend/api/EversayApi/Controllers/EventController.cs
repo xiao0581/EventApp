@@ -4,6 +4,8 @@ using MongoDB.Bson;
 using EversayApi.Data;
 using Event_lib;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Modules.Auth;
 
 namespace EversayApi.Controllers
 {
@@ -54,7 +56,14 @@ namespace EversayApi.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateEvent(Event createdEvent)
         {
-            //assuming EventImage is already a base64 string in the createdEvent object
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            if (string.IsNullOrEmpty(name))
+            {
+                return BadRequest("User not found");
+            }
+
+            createdEvent.Name = name; //eventually change this to the user's ID
+
             if (string.IsNullOrEmpty(createdEvent.EventImage))
             {
                 createdEvent.EventImage = "";

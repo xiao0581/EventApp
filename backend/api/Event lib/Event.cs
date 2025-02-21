@@ -9,6 +9,9 @@ namespace Event_lib
         [BsonRepresentation(BsonType.ObjectId)]
         public string? eventId { get; set; }
 
+        [BsonElement("name"), BsonRepresentation(BsonType.String)]
+        public string? Name { get; set; }
+
         [BsonElement("event_title"), BsonRepresentation(BsonType.String)]
         public required string EventTitle { get; set; }
 
