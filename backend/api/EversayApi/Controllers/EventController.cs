@@ -20,6 +20,11 @@ namespace EversayApi.Controllers
             _events = mongoDbService.Database?.GetCollection<Event>("event");
         }
 
+        public static string GenerateInvitationLink(string eventId)
+        {
+            return $"https://eversay.com/event/{eventId}"; //change this to the actual domain
+        }
+
         [HttpGet]
         public async Task<IEnumerable<Event>> GetAllEvents()
         {
