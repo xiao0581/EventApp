@@ -95,8 +95,6 @@ const handleLogin = async (): Promise<void> => {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  height: 100vh;
-  margin: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
