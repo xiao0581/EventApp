@@ -29,5 +29,13 @@ namespace GuestList_lib
 
         [BsonElement("created_at"), BsonRepresentation(BsonType.DateTime)]
         public DateTime CreatedAt { get; set; }
+
+        public void ValidateGuestListName()
+        {
+            if (string.IsNullOrEmpty(GuestListName))
+            {
+                throw new ArgumentException("Guest list name cannot be empty");
+            }
+        }
     }
 }

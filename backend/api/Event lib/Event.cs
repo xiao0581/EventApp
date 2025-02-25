@@ -35,5 +35,20 @@ namespace Event_lib
 
         [BsonElement("event_category"), BsonRepresentation(BsonType.String)]
         public string? EventCategory { get; set; }
+
+        public void ValidateTitle()
+        {
+            if (string.IsNullOrEmpty(EventTitle))
+            {
+                throw new ArgumentException("Event title cannot be empty");
+            }
+        }
+        public void ValidateDescription()
+        {
+            if (string.IsNullOrEmpty(EventDescription))
+            {
+                throw new ArgumentException("Event description cannot be empty");
+            }
+        }
     }
 }
