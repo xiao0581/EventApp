@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
+using User_lib;
 
 namespace EversayApi.Controllers
 {
@@ -17,11 +18,18 @@ namespace EversayApi.Controllers
     {
         private readonly UserManager<Applicationuser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly UserService _userService;
+        private readonly IPasswordHasher<User> _passwordHasher;
 
-        public AuthenticationController(UserManager<Applicationuser> userManager, RoleManager<ApplicationRole> roleManager)
+        public AuthenticationController(UserManager<Applicationuser> userManager,
+            RoleManager<ApplicationRole> roleManager,
+            UserService userService,
+            IPasswordHasher<User> passwordHasher)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _userService = userService;
+            _passwordHasher = passwordHasher;
         }
 
         [HttpPost]
