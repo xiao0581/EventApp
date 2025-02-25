@@ -23,6 +23,7 @@ namespace User_lib
 
         [BsonElement("profile_picture"), BsonRepresentation(BsonType.String)]
         public string? ProfilePicture { get; set; }
+        public required string PasswordHash { get; set; }
     }
     public enum UserType
     {
