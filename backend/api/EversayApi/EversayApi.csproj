@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.Identity.MongoDbCore" Version="3.1.2" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="MongoDB.Bson" Version="2.30.0" />
@@ -17,8 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Event lib\Modules.EventLib.csproj" />
+    <ProjectReference Include="..\Guest lib\Modules.GuestListLib.csproj" />
     <ProjectReference Include="..\Message lib\Modules.MessageLib.csproj" />
     <ProjectReference Include="..\Modules.Auth\Modules.Auth.csproj" />
+    <ProjectReference Include="..\SasTokenLib\SasTokenLib.csproj" />
     <ProjectReference Include="..\User lib\Modules.UserLib.csproj" />
   </ItemGroup>
 

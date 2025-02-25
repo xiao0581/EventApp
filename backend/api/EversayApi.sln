@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.GuestListLib", "Gue
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Auth", "Modules.Auth\Modules.Auth.csproj", "{B3C022AF-2173-44D2-BB4D-8CDE732809A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SasTokenLib", "SasTokenLib\SasTokenLib.csproj", "{E1FCB3D0-C284-4F78-8A7D-659AC70D0E97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{B3C022AF-2173-44D2-BB4D-8CDE732809A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3C022AF-2173-44D2-BB4D-8CDE732809A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3C022AF-2173-44D2-BB4D-8CDE732809A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1FCB3D0-C284-4F78-8A7D-659AC70D0E97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1FCB3D0-C284-4F78-8A7D-659AC70D0E97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1FCB3D0-C284-4F78-8A7D-659AC70D0E97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1FCB3D0-C284-4F78-8A7D-659AC70D0E97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

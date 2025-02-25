@@ -8,6 +8,8 @@ using Modules.Auth;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Bson.Serialization;
 using System.Text;
+using SasTokenLib;
+using SasTokenLib.SasTokenLib;
 
 var builder = WebApplication.CreateBuilder(args);
 BsonSerializer.RegisterSerializer(new GuidSerializer(MongoDB.Bson.BsonType.String));
@@ -132,6 +134,11 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader();
     });
 });
+
+
+//SasToken
+builder.Services.AddSingleton<SasTokenRepository>();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 var app = builder.Build();
 
