@@ -1,16 +1,17 @@
 ﻿using EversayApi.Data;
+using EversayApi.Dtos;
 using Microsoft.AspNetCore.Identity;
 using MongoDB.Driver;
 using User_lib;
 
-namespace EversayApi.Dtos
+namespace EversayApi.Services
 {
     public class UserService
     {
         private readonly IMongoCollection<User>? _users;
         private readonly IPasswordHasher<User> _passwordHasher;
 
-        public UserService(MongoDbService dbService, IPasswordHasher<User> passwordHasher)
+        public UserService(MongoDbService dbService, IPasswordHasher<User>? passwordHasher = null)
         {
             _users = dbService.Database.GetCollection<User>("users");
             _passwordHasher = passwordHasher;

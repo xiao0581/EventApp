@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using EversayApi.Dtos;
+using EversayApi.Services;
 using Modules.Auth;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
 using User_lib;
+using EversayApi.Services;
 
 namespace EversayApi.Controllers
 {

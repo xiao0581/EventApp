@@ -10,6 +10,8 @@ using MongoDB.Bson.Serialization;
 using System.Text;
 using SasTokenLib;
 using SasTokenLib.SasTokenLib;
+using User_lib;
+using EversayApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 BsonSerializer.RegisterSerializer(new GuidSerializer(MongoDB.Bson.BsonType.String));
@@ -139,6 +141,8 @@ builder.Services.AddCors(options =>
 //SasToken
 builder.Services.AddSingleton<SasTokenRepository>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+builder.Services.AddScoped<EversayApi.Services.UserService>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 var app = builder.Build();
 
