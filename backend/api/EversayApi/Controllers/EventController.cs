@@ -55,6 +55,10 @@ namespace EversayApi.Controllers
         public async Task<IEnumerable<Event>> OrderByDateAsc(DateTime date)
         {
             var filter = Builders<Event>.Filter.Gt("event_date", date);
+
+
+
+
             return await _events.Find(filter).ToListAsync();
         }
 

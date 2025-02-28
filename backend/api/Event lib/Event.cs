@@ -21,11 +21,17 @@ namespace Event_lib
         [BsonElement("event_date"), BsonRepresentation(BsonType.DateTime)]
         public DateTime EventDate { get; set; }
 
+        [BsonElement("Duration"), BsonRepresentation(BsonType.String)]
+        public string? Duration { get; set; }
+
         [BsonElement("created_at"), BsonRepresentation(BsonType.DateTime)]
         public DateTime CreatedAt { get; set; }
 
         [BsonElement("expired_at"), BsonRepresentation(BsonType.DateTime)]
         public DateTime ExpiredAt { get; set; }
+
+        [BsonElement("event_eventPreview"), BsonRepresentation(BsonType.String)]
+        public string? EventPreview { get; set; }
 
         [BsonElement("event_image"), BsonRepresentation(BsonType.String)]
         public string? EventImage { get; set; }

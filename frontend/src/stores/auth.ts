@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
 
 interface User {
   username: string
@@ -6,87 +7,70 @@ interface User {
   token: string
 }
 
-interface AuthState {
-  user: User | null
-}
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref<User | null>(null)
 
-export const useAuthStore = defineStore('auth', {
-  state: (): AuthState => ({
-    user: null,
-  }),
+  const loadUser = () => {
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      user.value = JSON.parse(storedUser)
+    }
+  }
 
-  actions: {
-    loadUser(): void {
-      const storedUser = localStorage.getItem('user')
-      if (storedUser) {
-        this.user = JSON.parse(storedUser)
+  const login = async (credentials: { email: string; password: string }) => {
+    try {
+      const response = await fetch('http://localhost:5102/api/v1/authenticate/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Invalid username or password')
       }
-    },
 
-    async login(credentials: { email: string; password: string }): Promise<void> {
-      try {
-        const response = await fetch('http://localhost:5102/api/v1/authenticate/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password,
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error('Invalid username or password')
-        }
-
-        const data = await response.json()
-
-        this.user = {
-          username: data.userId,
-          email: data.email,
-          token: data.accessToken,
-        }
-        localStorage.setItem('user', JSON.stringify(this.user))
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new Error(error.message || 'Failed to login')
-        } else {
-          throw new Error('Failed to login')
-        }
+      const data = await response.json()
+      user.value = {
+        username: data.userId,
+        email: data.email,
+        token: data.accessToken,
       }
-    },
+      localStorage.setItem('user', JSON.stringify(user.value))
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Failed to login')
+    }
+  }
 
-    async register(credentials: {
-      username: string
-      password: string
-      confirmPassword: string
-      email: string
-    }): Promise<void> {
-      try {
-        const response = await fetch('http://localhost:5102/api/v1/authenticate/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(credentials),
-        })
+  const register = async (credentials: {
+    username: string
+    password: string
+    confirmPassword: string
+    email: string
+  }) => {
+    try {
+      const response = await fetch('http://localhost:5102/api/v1/authenticate/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      })
 
-        if (!response.ok) {
-          throw new Error('Registration failed')
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new Error(error.message || 'Failed to register')
-        } else {
-          throw new Error('Failed to register')
-        }
+      if (!response.ok) {
+        throw new Error('Registration failed')
       }
-    },
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Failed to register')
+    }
+  }
 
-    logout(): void {
-      this.user = null
-      localStorage.removeItem('user')
-    },
+  const logout = () => {
+    user.value = null
+    localStorage.removeItem('user')
+  }
 
-    isAuthenticated(): boolean {
-      return !!this.user
-    },
-  },
+  const isAuthenticated = computed(() => !!user.value)
+
+  return { user, loadUser, login, register, logout, isAuthenticated }
 })

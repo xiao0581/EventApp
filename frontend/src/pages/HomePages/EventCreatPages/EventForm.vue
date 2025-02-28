@@ -17,7 +17,7 @@
         <div class="Poster">
           <q-file
             class="file-input"
-            v-model="eventPoster"
+            v-model="eventData.eventImage"
             label="Tap to open the gallery"
             accept="image/*"
             borderless
@@ -30,7 +30,7 @@
         <div class="Preview">
           <q-file
             class="file-input"
-            v-model="eventPreview"
+            v-model="eventData.eventPreview"
             label="Tap to open the gallery"
             accept="video/*"
             borderless
@@ -43,11 +43,11 @@
         </div>
         <div class="input-label">Event Date</div>
         <div class="EventDate" style="max-width: 300px">
-          <q-input filled v-model="date">
+          <q-input filled v-model="eventData.eventDate">
             <template v-slot:prepend>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="date" mask="YYYY-MM-DD HH:mm">
+                  <q-date v-model="eventData.eventDate" mask="YYYY-MM-DD HH:mm">
                     <div class="row items-center justify-end">
                       <q-btn v-close-popup label="Close" color="primary" flat />
                     </div>
@@ -59,7 +59,7 @@
             <template v-slot:append>
               <q-icon name="access_time" class="cursor-pointer">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-time v-model="date" mask="YYYY-MM-DD HH:mm" format24h>
+                  <q-time v-model="eventData.eventDate" mask="YYYY-MM-DD HH:mm" format24h>
                     <div class="row items-center justify-end">
                       <q-btn v-close-popup label="Close" color="primary" flat />
                     </div>
@@ -69,12 +69,42 @@
             </template>
           </q-input>
         </div>
-        <div class="input-label">Event name</div>
-        <q-input v-model="eventname" label="please enter event name" filled class="q-mt-md" />
+        <div class="input-label">Title</div>
+        <q-input
+          v-model="eventData.eventTitle"
+          label="please enter event title"
+          filled
+          class="q-mt-md"
+        />
+        <div class="input-label">Category</div>
+        <q-input
+          v-model="eventData.eventCategory"
+          label="please enter event title"
+          filled
+          class="q-mt-md"
+        />
+        <div class="input-label">Duration</div>
+        <q-input
+          v-model="eventData.duration"
+          label="please enter event duration"
+          filled
+          class="q-mt-md"
+        />
+
         <div class="input-label">Location</div>
-        <q-input v-model="eventLocation" label="please enter location" filled class="q-mt-md" />
-        <div class="input-label">Event description</div>
-        <q-input v-model="description" label="please enter description" filled class="q-mt-md" />
+        <q-input
+          v-model="eventData.eventLocation"
+          label="please enter location"
+          filled
+          class="q-mt-md"
+        />
+        <div class="input-label">Description</div>
+        <q-input
+          v-model="eventData.description"
+          label="please enter description"
+          filled
+          class="q-mt-md"
+        />
       </div>
 
       <div v-if="step === 2">
@@ -94,6 +124,15 @@
     <div class="footer" :class="{ 'footer-right': step === 1, 'footer-default': step > 1 }">
       <q-btn v-if="step > 1" label="Back" outline @click="prevStep" />
 
+      <q-btn
+        v-if="step === 1"
+        label="Save"
+        color="primary"
+        class="btn-large"
+        @click="eventcreate"
+        :loading="loading"
+        :disable="loading"
+      />
       <q-btn v-if="step === 1" label="Next" color="primary" class="btn-large" @click="nextStep" />
 
       <q-btn v-if="step > 1" label="Next" color="primary" :disable="step === 3" @click="nextStep" />
@@ -102,24 +141,67 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { eventCreation } from 'src/stores/eventcreation'
+import { Notify } from 'quasar'
+const useEventStore = eventCreation()
+const eventData = reactive({
+  eventImage: null as File | null,
+  eventPreview: null as File | null,
+  eventDate: '',
+  eventTitle: '',
+  duration: '',
+  eventLocation: '',
+  eventname: '',
+  description: '',
+  createdAt: '',
+  expiredAt: '',
+  eventCategory: '',
+})
 
-const eventPoster = ref<File | null>(null)
-const eventPreview = ref<File | null>(null)
+const loading = ref<boolean>(false)
 const hostEmail = ref<string>('')
 const guests = ref<string[]>([])
 const step = ref<number>(1)
-const posterPreviewUrl = ref<string | null>(null)
-const previewVideoUrl = ref<string | null>(null)
-const date = ref<string>('')
-const eventLocation = ref<string>('')
-const eventname = ref<string>('')
-const description = ref<string>('')
+const posterPreviewUrl = ref<string>('')
+const previewVideoUrl = ref<string>('')
+
 const updatePosterPreview = (file: File | null) => {
   if (file) {
     posterPreviewUrl.value = URL.createObjectURL(file)
   } else {
-    posterPreviewUrl.value = null
+    posterPreviewUrl.value = ''
+  }
+}
+
+const eventcreate = async (): Promise<void> => {
+  console.log('eventData:', eventData)
+  loading.value = true
+  try {
+    await useEventStore.creation({
+      eventTitle: eventData.eventTitle,
+      description: eventData.description,
+      eventDate: eventData.eventDate,
+      duration: eventData.duration,
+      createdAt: eventData.createdAt,
+      expiredAt: eventData.eventDate,
+      eventLocation: eventData.eventLocation,
+      eventImage: eventData.eventImage,
+      eventPreview: eventData.eventPreview,
+      eventCategory: eventData.eventCategory,
+    })
+    Notify.create({
+      type: 'positive',
+      message: 'Create successful!',
+    })
+  } catch (error: unknown) {
+    const message = (error as Error).message || 'An unknown error occurred.'
+    Notify.create({
+      type: 'negative',
+      message,
+    })
+  } finally {
+    loading.value = false
   }
 }
 
@@ -127,7 +209,7 @@ const updatePreviewVideo = (file: File | null) => {
   if (file) {
     previewVideoUrl.value = URL.createObjectURL(file)
   } else {
-    previewVideoUrl.value = null
+    previewVideoUrl.value = ''
   }
 }
 
@@ -261,6 +343,7 @@ const prevStep = () => {
 
 .footer-right {
   justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .footer-default {
