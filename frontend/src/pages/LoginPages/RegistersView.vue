@@ -10,7 +10,7 @@
       <q-card-section>
         <q-form @submit.prevent="handleRegister" class="form-container">
           <q-input
-            v-model="email"
+            v-model="form.email"
             label="Email"
             type="email"
             outlined
@@ -20,19 +20,9 @@
             style="width: 100%; max-width: 350px"
             :rules="[(val) => !!val || 'Email is required']"
           />
-          <q-input
-            v-model="username"
-            label="Username"
-            outlined
-            required
-            rounded
-            label-color="primary"
-            style="width: 100%; max-width: 350px"
-            :rules="[(val) => !!val || 'Username is required']"
-          />
 
           <q-input
-            v-model="password"
+            v-model="form.password"
             label="Password"
             type="password"
             outlined
@@ -44,7 +34,7 @@
           />
 
           <q-input
-            v-model="confirmPassword"
+            v-model="form.confirmPassword"
             label="Confirm Password"
             type="password"
             outlined
@@ -75,14 +65,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { Notify } from 'quasar'
 
-const username = ref<string>('')
-const password = ref<string>('')
-const email = ref<string>('')
-const confirmPassword = ref<string>('')
+const form = reactive({
+  password: '',
+  email: '',
+  confirmPassword: '',
+})
+
 const loading = ref<boolean>(false)
 
 const authStore = useAuthStore()
@@ -91,10 +83,9 @@ const handleRegister = async (): Promise<void> => {
   loading.value = true
   try {
     await authStore.register({
-      username: username.value,
-      password: password.value,
-      email: email.value,
-      confirmPassword: confirmPassword.value,
+      password: form.password,
+      email: form.email,
+      confirmPassword: form.confirmPassword,
     })
 
     Notify.create({

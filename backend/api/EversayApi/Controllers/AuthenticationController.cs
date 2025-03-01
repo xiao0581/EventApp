@@ -56,8 +56,13 @@ namespace EversayApi.Controllers
         {
             try
             {
+                if (request.Password != request.ConfirmPassword)
+                {
+                    return new RegisterResponse { Message = "Confirm password do not match", Success = false };
+                }
+
                 var userExists = await _userManager.FindByEmailAsync(request.Email);
-                if (userExists != null) return new RegisterResponse { Message = "User already exists", Success = false };
+                if (userExists != null) return new RegisterResponse { Message = "Email address already exists", Success = false };
 
                 userExists = new Applicationuser
                 {

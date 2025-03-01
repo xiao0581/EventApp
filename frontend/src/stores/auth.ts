@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 interface User {
-  username: string
   email: string
   token: string
 }
@@ -34,7 +33,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       const data = await response.json()
       user.value = {
-        username: data.userId,
         email: data.email,
         token: data.accessToken,
       }
@@ -45,7 +43,6 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const register = async (credentials: {
-    username: string
     password: string
     confirmPassword: string
     email: string
@@ -57,11 +54,24 @@ export const useAuthStore = defineStore('auth', () => {
         body: JSON.stringify(credentials),
       })
 
+      let errorMessage = 'Registration failed'
+
       if (!response.ok) {
-        throw new Error('Registration failed')
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json()
+          errorMessage = data.message || errorMessage
+        } else {
+          errorMessage = await response.text()
+        }
+        throw new Error(errorMessage)
       }
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to register')
+      if (error instanceof Error) {
+        throw error
+      } else {
+        throw new Error('Failed to register')
+      }
     }
   }
 
