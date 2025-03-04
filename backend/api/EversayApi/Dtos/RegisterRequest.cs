@@ -10,7 +10,7 @@ namespace EversayApi.Dtos
         public string Name { get; set; } = string.Empty;
         [Required, DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
-        [Required, DataType(DataType.Password), Compare(nameof(Password), ErrorMessage = "Wrong password entered")]
+        [Required, DataType(DataType.Password)]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

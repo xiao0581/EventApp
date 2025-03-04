@@ -38,9 +38,9 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     if (!authStore.user) {
       authStore.loadUser()
     }
-    if (to.meta.requiresGuest && authStore.isAuthenticated()) {
+    if (to.meta.requiresGuest && authStore.isAuthenticated) {
       next('/home')
-    } else if (to.meta.requiresAuth && !authStore.isAuthenticated()) {
+    } else if (to.meta.requiresAuth && !authStore.isAuthenticated) {
       next('/MainLoginView')
     } else {
       next()
