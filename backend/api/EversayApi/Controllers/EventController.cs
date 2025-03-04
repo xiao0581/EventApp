@@ -5,7 +5,6 @@ using EversayApi.Data;
 using Event_lib;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using User_lib;
 
 namespace EversayApi.Controllers
 {
@@ -58,10 +57,15 @@ namespace EversayApi.Controllers
             return await _events.Find(filter).ToListAsync();
         }
 
-        [HttpGet("searchbyuser/{Name}")]
-        public async Task<IEnumerable<Event>> GetEventByUser(string Name)
+        [HttpGet("searchbyuser")] //searches the currently logged in user's events
+        public async Task<IEnumerable<Event>> GetEventByUser()
         {
-            var filter = Builders<Event>.Filter.Eq("name", Name);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Enumerable.Empty<Event>();
+            }
+            var filter = Builders<Event>.Filter.Eq("created_by", userId);
             return await _events.Find(filter).ToListAsync();
         }
 
