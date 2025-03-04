@@ -100,7 +100,7 @@
         />
         <div class="input-label">Description</div>
         <q-input
-          v-model="eventData.description"
+          v-model="eventData.eventDescription"
           label="please enter description"
           filled
           class="q-mt-md"
@@ -130,10 +130,7 @@
         color="primary"
         class="btn-large"
         @click="eventcreate"
-        :loading="loading"
-        :disable="loading"
       />
-      <q-btn v-if="step === 1" label="Next" color="primary" class="btn-large" @click="nextStep" />
 
       <q-btn v-if="step > 1" label="Next" color="primary" :disable="step === 3" @click="nextStep" />
     </div>
@@ -142,7 +139,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
-import { eventCreation } from 'src/stores/eventcreation'
+import { eventCreation } from 'src/stores/eventstores'
 import { Notify } from 'quasar'
 const useEventStore = eventCreation()
 const eventData = reactive({
@@ -153,7 +150,7 @@ const eventData = reactive({
   duration: '',
   eventLocation: '',
   eventname: '',
-  description: '',
+  eventDescription: '',
   createdAt: '',
   expiredAt: '',
   eventCategory: '',
@@ -180,7 +177,7 @@ const eventcreate = async (): Promise<void> => {
   try {
     await useEventStore.creation({
       eventTitle: eventData.eventTitle,
-      description: eventData.description,
+      eventDescription: eventData.eventDescription,
       eventDate: eventData.eventDate,
       duration: eventData.duration,
       createdAt: eventData.createdAt,
@@ -343,7 +340,6 @@ const prevStep = () => {
 
 .footer-right {
   justify-content: flex-end;
-  justify-content: space-between;
 }
 
 .footer-default {

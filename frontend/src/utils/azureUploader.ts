@@ -16,7 +16,7 @@ export const getSasToken = async (): Promise<string> => {
       expiryMinutes: 60,
     }
 
-    const response = await fetch('http://localhost:5102/api/generate-sas-token', {
+    const response = await fetch('http://localhost:5102/api/SasToken/generate', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -30,7 +30,8 @@ export const getSasToken = async (): Promise<string> => {
     }
 
     const data = await response.json()
-    return data.sasToken
+
+    return data.sasUrl
   } catch (error) {
     console.error('Error fetching SAS Token:', error)
     throw new Error('Failed to get SAS Token')
@@ -38,14 +39,10 @@ export const getSasToken = async (): Promise<string> => {
 }
 
 export const uploadToAzureBlob = async (file: File): Promise<string> => {
+  const sasToken = await getSasToken()
+  const blobUrl = `https://eversaydevne.blob.core.windows.net/eversaydev/${file.name}${sasToken}`
+
   try {
-    const containerName = 'eversayde'
-    const accountName = 'eversaydevne'
-
-    const sasToken = await getSasToken()
-
-    const blobUrl = `https://${accountName}.blob.core.windows.net/${containerName}/${file.name}?${sasToken}`
-
     const response = await fetch(blobUrl, {
       method: 'PUT',
       headers: {
@@ -59,7 +56,7 @@ export const uploadToAzureBlob = async (file: File): Promise<string> => {
       throw new Error('Upload to Azure failed')
     }
 
-    const urlWithoutSasToken = blobUrl.split('?')[0]
+    const urlWithoutSasToken = `https://eversaydevne.blob.core.windows.net/eversaydev/${file.name}`
     if (!urlWithoutSasToken) {
       throw new Error('Failed to parse blob URL')
     }

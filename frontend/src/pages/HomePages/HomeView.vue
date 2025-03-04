@@ -59,7 +59,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useEventStore } from 'src/stores/eventstores'
+import { useEventStore } from 'src/stores/11'
 import { useRouter } from 'vue-router'
 import InvitationsCompo from 'src/components/InvitationsCom.vue'
 import UpcomingEvent from 'src/components/UpcomingEvent.vue'

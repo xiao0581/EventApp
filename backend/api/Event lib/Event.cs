@@ -40,7 +40,7 @@ namespace Event_lib
         public string? EventCategory { get; set; }
 
         [BsonElement("created_by"), BsonRepresentation(BsonType.String)]
-        public required string CreatedBy { get; set; }
+        public  string CreatedBy { get; set; }
 
         public void ValidateTitle()
         {

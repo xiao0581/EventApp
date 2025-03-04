@@ -70,7 +70,7 @@ namespace EversayApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateEvent(Event createdEvent)
+        public async Task<ActionResult> CreateEvent([FromBody] Event createdEvent)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -84,7 +84,10 @@ namespace EversayApi.Controllers
             {
                 createdEvent.EventImage = "";
             }
-
+            if (string.IsNullOrEmpty(createdEvent.CreatedBy))
+            {
+                createdEvent.CreatedBy = userId;
+            }
             createdEvent.CreatedAt = DateTime.UtcNow;
             createdEvent.ExpiredAt = createdEvent.EventDate.AddDays(100);
             await _events.InsertOneAsync(createdEvent);

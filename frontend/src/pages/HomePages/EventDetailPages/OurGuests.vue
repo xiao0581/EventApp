@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useEventStore } from 'src/stores/eventstores'
+import { useEventStore } from 'src/stores/11'
 
 import GuestList from 'src/components/GuestListcompo.vue'
 

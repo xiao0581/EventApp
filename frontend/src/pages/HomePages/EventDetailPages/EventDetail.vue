@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
-import { useEventStore } from 'src/stores/eventstores'
+import { useEventStore } from 'src/stores/11'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import GuestListcompo from 'src/components/GuestListcompo.vue'

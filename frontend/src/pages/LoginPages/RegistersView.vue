@@ -55,7 +55,7 @@
             :disable="loading"
           />
           <div class="signup-container">
-            <span>Joind us before?</span>
+            <span>Joined us before?</span>
             <router-link to="/login" class="signup-link">Log in</router-link>
           </div>
         </q-form>
