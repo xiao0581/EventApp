@@ -11,7 +11,6 @@ namespace EversayApi.Controllers
     [Authorize]
     public class MessageController : Controller
     {
-        private const long maxAllowedSize = 10 * 1024 * 1024; //10MB, can be changed
         private readonly IMongoCollection<Message>? _messages;
         public MessageController(MongoDbService mongoDbService)
         {
@@ -31,7 +30,7 @@ namespace EversayApi.Controllers
             if (msgAttachment != null)
             {
                 MemoryStream memoryStream = new MemoryStream();
-                msgAttachment.OpenReadStream().CopyTo(memoryStream); //need to change max file size but maxAllowedSize is not working for some reason
+                msgAttachment.OpenReadStream().CopyTo(memoryStream);
                 sentMessage.MessageAttachment = Convert.ToBase64String(memoryStream.ToArray());
             }
             else
