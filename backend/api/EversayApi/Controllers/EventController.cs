@@ -5,6 +5,7 @@ using EversayApi.Data;
 using Event_lib;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using User_lib;
 
 namespace EversayApi.Controllers
 {
@@ -14,6 +15,8 @@ namespace EversayApi.Controllers
     public class EventController : ControllerBase
     {
         private readonly IMongoCollection<Event>? _events;
+        private readonly IMongoCollection<User>? _users;
+
         public EventController(MongoDbService mongoDbService)
         {
             _events = mongoDbService.Database?.GetCollection<Event>("event");
@@ -67,6 +70,21 @@ namespace EversayApi.Controllers
             }
             var filter = Builders<Event>.Filter.Eq("created_by", userId);
             return await _events.Find(filter).ToListAsync();
+        }
+
+        [HttpGet("searchbyuser/{userName}")] //searches the events of a specific user
+        public async Task<IEnumerable<Event>> GetEventByUserName(string userName)
+        {
+            var userFilter = Builders<User>.Filter.Eq("userName", userName);
+            var user = await _users.Find(userFilter).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return Enumerable.Empty<Event>();
+            }
+
+            var eventFilter = Builders<Event>.Filter.Eq("created_by", user.userId);
+            return await _events.Find(eventFilter).ToListAsync();
         }
 
         [HttpPost]
