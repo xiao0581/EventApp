@@ -58,6 +58,13 @@ namespace EversayApi.Controllers
             return await _events.Find(filter).ToListAsync();
         }
 
+        [HttpGet("searchbyuser/{Name}")]
+        public async Task<IEnumerable<Event>> GetEventByUser(string Name)
+        {
+            var filter = Builders<Event>.Filter.Eq("name", Name);
+            return await _events.Find(filter).ToListAsync();
+        }
+
         [HttpPost]
         public async Task<ActionResult> CreateEvent(Event createdEvent)
         {
