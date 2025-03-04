@@ -9,9 +9,6 @@ namespace Event_lib
         [BsonRepresentation(BsonType.ObjectId)]
         public string? eventId { get; set; }
 
-        [BsonElement("name"), BsonRepresentation(BsonType.String)]
-        public string? Name { get; set; }
-
         [BsonElement("event_title"), BsonRepresentation(BsonType.String)]
         public required string EventTitle { get; set; }
 
@@ -41,6 +38,9 @@ namespace Event_lib
 
         [BsonElement("event_category"), BsonRepresentation(BsonType.String)]
         public string? EventCategory { get; set; }
+
+        [BsonElement("created_by"), BsonRepresentation(BsonType.String)]
+        public required string CreatedBy { get; set; }
 
         public void ValidateTitle()
         {

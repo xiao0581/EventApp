@@ -5,7 +5,7 @@ using EversayApi.Data;
 using Event_lib;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Modules.Auth;
+using User_lib;
 
 namespace EversayApi.Controllers
 {
@@ -55,10 +55,6 @@ namespace EversayApi.Controllers
         public async Task<IEnumerable<Event>> OrderByDateAsc(DateTime date)
         {
             var filter = Builders<Event>.Filter.Gt("event_date", date);
-
-
-
-
             return await _events.Find(filter).ToListAsync();
         }
 
@@ -72,14 +68,14 @@ namespace EversayApi.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateEvent(Event createdEvent)
         {
-            var name = User.FindFirstValue(ClaimTypes.Name);
-            if (string.IsNullOrEmpty(name))
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("User not found");
             }
 
-            createdEvent.Name = name; //eventually change this to the user's ID
-
+            createdEvent.CreatedBy = userId;
+            
             if (string.IsNullOrEmpty(createdEvent.EventImage))
             {
                 createdEvent.EventImage = "";
