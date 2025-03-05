@@ -41,7 +41,7 @@ export const eventCreation = defineStore('eventCreation', () => {
       if (createEvents.eventImage) {
         posterUrl = await uploadToAzureBlob(createEvents.eventImage)
       }
-      console.log('posterUrl', posterUrl)
+
       if (createEvents.eventPreview) {
         previewUrl = await uploadToAzureBlob(createEvents.eventPreview)
       }

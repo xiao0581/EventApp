@@ -3,10 +3,8 @@
   <q-page class="event-page">
     <div class="header">
       <div class="title">
-        {{ stepTitle }}
+        <p>Event details</p>
       </div>
-
-      <q-linear-progress :value="progress" :color="progressColor" class="progress-bar" />
     </div>
 
     <div class="content">
@@ -41,7 +39,7 @@
             Your browser does not support the video tag.
           </video>
         </div>
-        <div class="input-label">Event Date</div>
+        <div class="input-label">Date</div>
         <div class="EventDate" style="max-width: 300px">
           <q-input filled v-model="eventData.eventDate">
             <template v-slot:prepend>
@@ -85,8 +83,9 @@
         />
         <div class="input-label">Duration</div>
         <q-input
+          type="number"
           v-model="eventData.duration"
-          label="please enter event duration"
+          label="please enter hours"
           filled
           class="q-mt-md"
         />
@@ -138,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive } from 'vue'
 import { eventCreation } from 'src/stores/eventstores'
 import { Notify } from 'quasar'
 const useEventStore = eventCreation()
@@ -172,7 +171,6 @@ const updatePosterPreview = (file: File | null) => {
 }
 
 const eventcreate = async (): Promise<void> => {
-  console.log('eventData:', eventData)
   loading.value = true
   try {
     await useEventStore.creation({
@@ -209,20 +207,6 @@ const updatePreviewVideo = (file: File | null) => {
     previewVideoUrl.value = ''
   }
 }
-
-const stepTitle = computed(() => {
-  return step.value === 1
-    ? '1 of 3: Event details'
-    : step.value === 2
-      ? '2 of 3: Event host'
-      : '3 of 3: Event guests'
-})
-
-const progressColor = computed(() => 'blue')
-
-const progress = computed(() => {
-  return step.value === 1 ? 0.33 : step.value === 2 ? 0.66 : 1
-})
 
 const addHost = () => {
   if (hostEmail.value) {

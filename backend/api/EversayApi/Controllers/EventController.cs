@@ -6,6 +6,7 @@ using Event_lib;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using User_lib;
+using GuestList_lib;
 
 namespace EversayApi.Controllers
 {
@@ -16,10 +17,12 @@ namespace EversayApi.Controllers
     {
         private readonly IMongoCollection<Event>? _events;
         private readonly IMongoCollection<User>? _users;
+        private readonly IMongoCollection<GuestList> _guestList;
 
         public EventController(MongoDbService mongoDbService)
         {
             _events = mongoDbService.Database?.GetCollection<Event>("event");
+            _guestList = mongoDbService.Database?.GetCollection<GuestList>("guestlists");
         }
 
         public static string GenerateInvitationLink(string eventId)
@@ -94,6 +97,25 @@ namespace EversayApi.Controllers
             return await _events.Find(filter).ToListAsync();
         }
 
+        [HttpGet("byguest/{userId}")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetEventsByGuestUserId(string userId)
+        {                
+            var guestListFilter = Builders<GuestList>.Filter.Eq("User_id", userId);
+            var guestEntries = await _guestList.Find(guestListFilter).ToListAsync();
+
+            if (guestEntries == null || guestEntries.Count == 0)
+            {
+                return NotFound("No events found for this user.");
+            }
+
+            
+            var eventIds = guestEntries.Select(g => ObjectId.Parse(g.EventId)).ToList();
+
+            var eventFilter = Builders<Event>.Filter.In("_id", eventIds);
+            var events = await _events.Find(eventFilter).ToListAsync();
+
+            return Ok(events);
+        }
         [HttpPost]
         public async Task<ActionResult> CreateEvent([FromBody] Event createdEvent)
         {
@@ -115,7 +137,23 @@ namespace EversayApi.Controllers
             }
             createdEvent.CreatedAt = DateTime.UtcNow;
             createdEvent.ExpiredAt = createdEvent.EventDate.AddDays(100);
+
+           
             await _events.InsertOneAsync(createdEvent);
+
+            
+            var guestEntry = new GuestList
+            {
+                EventId = createdEvent.eventId.ToString(),
+                UserId = userId.ToString(),
+                IsAttending = true,
+                GuestListName = createdEvent.EventTitle,                 
+                Attendees = 1,                               
+                GuestListImage = "",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _guestList.InsertOneAsync(guestEntry);
             return CreatedAtAction(nameof(GetEventById), new { id = createdEvent.eventId }, createdEvent);
         }
 
