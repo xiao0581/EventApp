@@ -48,29 +48,7 @@ export const eventCreation = defineStore('eventCreation', () => {
       const eventDateObj = new Date(createEvents.eventDate.replace(' ', 'T') + ':00.000Z')
       const formattedEventDate = eventDateObj.toISOString()
       const createdBy = ''
-      console.log('📌 POST 请求之前，打印即将发送的数据:')
-      console.log('🖼️ eventImage (posterUrl):', posterUrl, 'Type:', typeof posterUrl)
-      console.log('📹 eventPreview (previewUrl):', previewUrl, 'Type:', typeof previewUrl)
-      console.log(
-        '📝 发送的 JSON 数据:',
-        JSON.stringify(
-          {
-            eventTitle: createEvents.eventTitle,
-            eventDescription: createEvents.eventDescription,
-            eventDate: formattedEventDate,
-            duration: createEvents.duration,
-            createdAt: new Date().toISOString(),
-            expiredAt: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
-            eventLocation: createEvents.eventLocation,
-            eventImage: posterUrl,
-            eventPreview: previewUrl,
-            eventCategory: createEvents.eventCategory,
-            createdBy: createdBy,
-          },
-          null,
-          2,
-        ),
-      )
+
       const response = await fetch('http://localhost:5102/api/Event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

@@ -5,7 +5,6 @@
 
       <div class="title">
         <h5>WELCOME TO EVERSAY</h5>
-        <p>Experience effortless event planning and create lasting memories together</p>
       </div>
       <div class="button-group">
         <q-btn unelevated class="login-option google-btn">
@@ -18,7 +17,7 @@
           <span>Continue with Apple</span>
         </q-btn>
 
-        <q-btn unelevated class="login-option email-btn" to="/emaillogin">
+        <q-btn unelevated class="login-option email-btn" to="/login">
           <q-icon name="mail" size="20px" />
           <span>Continue with Email</span>
         </q-btn>
@@ -63,7 +62,7 @@
 .title h5 {
   font-size: 30px;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 50px;
   color: white;
 }
 .title p {
@@ -89,7 +88,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 300px;
+  width: 250px;
   gap: 20px;
 }
 
@@ -114,18 +113,24 @@
 .google-btn {
   background: white;
   border: 1px solid #ccc;
+  font-weight: bold;
   color: black;
+  border-radius: 50px;
 }
 
 .apple-btn {
   background: white;
   border: 1px solid #ccc;
+  font-weight: bold;
   color: black;
+  border-radius: 50px;
 }
 
 .email-btn {
   background: white;
   border: 1px solid #ccc;
+  font-weight: bold;
   color: black;
+  border-radius: 50px;
 }
 </style>
