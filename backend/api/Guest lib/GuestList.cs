@@ -9,10 +9,13 @@ namespace GuestList_lib
         [BsonRepresentation(BsonType.ObjectId)]
         public string? GuestsId { get; set; }
 
-        [BsonElement("event_id"), BsonRepresentation(BsonType.String)] //connect to Event_lib this is to be the event_id, connecting a guest list to an event
+        [BsonElement("event_id"), BsonRepresentation(BsonType.String)]
         public string EventId { get; set; }
 
-        [BsonElement("User_ids"), BsonRepresentation(BsonType.String)] //connect to User_lib, this is to be the user_id, collecting a list of guests/users
+        [BsonElement("user_id"), BsonRepresentation(BsonType.String)]
+        public string UserId { get; set; }
+
+        [BsonElement("User_ids"), BsonRepresentation(BsonType.String)] //list of user ids that are attending the event
         public List<string> UserIds { get; set; } = new List<string>();
 
         [BsonElement("is_attending"), BsonRepresentation(BsonType.Boolean)]

@@ -66,7 +66,7 @@ namespace EversayApi.Controllers
             return Ok(createdGuestList);
         }
 
-        [HttpPut("{id}/add-user")]
+        [HttpPut("{id}/add-user")] //in the future add Authorize to Organizer of event
         public async Task<ActionResult> AddUserToGuestList(string id, [FromBody] string userIdToAdd)
         {
             var filter = Builders<GuestList>.Filter.Eq("guestListId", id);
