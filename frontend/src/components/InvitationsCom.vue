@@ -54,7 +54,7 @@ const hideInvite = (id: number) => {
 }
 
 .invitation-header p {
-  font-size: 20px;
+  font-size: 15px;
 }
 
 .invitation-card {

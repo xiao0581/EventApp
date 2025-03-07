@@ -138,9 +138,9 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { eventCreation } from 'src/stores/eventstores'
+import { eventStores } from 'src/stores/eventstores'
 import { Notify } from 'quasar'
-const useEventStore = eventCreation()
+const useEventStore = eventStores()
 const eventData = reactive({
   eventImage: null as File | null,
   eventPreview: null as File | null,

@@ -3,7 +3,7 @@
     <q-card class="profile-card">
       <q-card-section class="avatar-section">
         <q-avatar size="100px">
-          <img src="src/assets/pic/avatar1.jpg" alt="User Avatar" />
+          <img src="src/assets/pic/unicorn_avatar.png" alt="User Avatar" />
         </q-avatar>
       </q-card-section>
 

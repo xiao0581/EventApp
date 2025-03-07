@@ -8,8 +8,9 @@
     <h2>Celebration in 2 days</h2>
     <div class="event-card" v-for="event in events" :key="event.id" @click="goToEvent(event.id)">
       <div class="event-card-image">
-        <q-img :src="event.image" alt="Wedding image" />
+        <q-img v-if="sasToken" :src="event.image" alt="Event image" />
       </div>
+
       <div class="event-card-content">
         <h5 class="event-title">{{ event.name }}</h5>
         <div class="event-details">
@@ -18,14 +19,19 @@
           </p>
           <p class="event-location"><q-icon name="place" /> {{ event.location }}</p>
         </div>
+
         <div class="event-guests">
           <div class="guest-avatars">
-            <q-avatar v-for="guest in event.guests.slice(0, 5)" :key="guest.id" size="32px">
-              <q-img :src="guest.avatar" alt="gest avatar" />
-            </q-avatar>
-            <span class="additional-guests" v-if="event.guests.length > 5"
-              >+{{ event.guests.length - 5 }}</span
+            <q-avatar
+              v-for="guest in eventss.guests?.slice(0, 5) ?? []"
+              :key="guest.id"
+              size="32px"
             >
+              <q-img :src="guest.avatar || 'default-avatar.jpg'" alt="guest avatar" />
+            </q-avatar>
+            <span class="additional-guests" v-if="(eventss.guests?.length ?? 0) > 5">
+              +{{ (eventss.guests?.length ?? 0) - 5 }}
+            </span>
           </div>
           <q-btn
             flat
@@ -36,6 +42,7 @@
             @click.stop
           />
         </div>
+
         <div class="custom-preview-button">
           <span class="button-text">Catch the celebration vibe with a quick preview</span>
           <div class="button-icon">
@@ -47,7 +54,7 @@
   </div>
 
   <div class="invitations-section">
-    <h2>My Invitations ({{ invitations.length }})</h2>
+    <h2>My Invitations</h2>
     <InvitationsCompo />
   </div>
 
@@ -58,34 +65,79 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useEventStore } from 'src/stores/11'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { eventStores } from 'src/stores/eventstores'
 import InvitationsCompo from 'src/components/InvitationsCom.vue'
 import UpcomingEvent from 'src/components/UpcomingEvent.vue'
+import { getReadSasToken } from 'src/utils/azureUploader'
+import { useRouter } from 'vue-router'
 
-const eventStore = useEventStore()
 const router = useRouter()
+
+const goToEvent = async (id: string) => {
+  try {
+    await router.push(`/event/${id}`)
+  } catch (error) {
+    console.error('Navigation error:', error)
+  }
+}
+const sasToken = ref<string>('')
+
+const eventss = ref({
+  guests: [
+    { id: 1, avatar: 'avatar1.jpg' },
+    { id: 2, avatar: 'avatar2.jpg' },
+    { id: 3, avatar: 'avatar3.jpg' },
+    { id: 4, avatar: 'avatar4.jpg' },
+    { id: 5, avatar: 'avatar5.jpg' },
+    { id: 6, avatar: 'avatar6.jpg' },
+  ],
+})
+
+const eventStore = eventStores()
+
 const today = new Date()
 const dayAfterTomorrow = new Date()
 dayAfterTomorrow.setDate(today.getDate() + 2)
-const invitations = computed(() => eventStore.invitations || [])
 
-const events = computed(() => {
-  return eventStore.events
-    .map((event) => ({
-      ...event,
-      guests: event.guests || [],
-    }))
-    .filter((event) => {
-      const eventDate = new Date(event.date)
-      return eventDate >= today && eventDate < dayAfterTomorrow
-    })
+onMounted(async () => {
+  try {
+    await eventStore.getEventsByuser()
+    sasToken.value = await getReadSasToken()
+  } catch (error) {
+    console.error('Error fetching events:', error)
+  }
 })
 
-const goToEvent = async (id: number) => {
-  await router.push(`/event/${id}`)
-}
+const events = computed(() => {
+  return eventStore.userEvents
+    .filter((event) => {
+      if (!event.eventDate) return false
+
+      const eventDate = new Date(event.eventDate)
+      const eventTimestamp = eventDate.getTime()
+
+      return (
+        !isNaN(eventTimestamp) &&
+        eventTimestamp >= today.getTime() &&
+        eventTimestamp < dayAfterTomorrow.getTime()
+      )
+    })
+    .map((event) => ({
+      id: event.eventId,
+      name: event.eventTitle,
+      description: event.eventDescription,
+      date: event.eventDate.split('T')[0],
+      startTime: event.eventDate?.split('T')[1]?.slice(0, 5) || '',
+      image:
+        typeof event.eventImage === 'string'
+          ? `${event.eventImage}?${sasToken.value}`
+          : 'default-event.jpg',
+      location: event.eventLocation,
+      category: event.eventCategory,
+      createdBy: event.createdBy,
+    }))
+})
 </script>
 
 <style scoped>
@@ -142,6 +194,7 @@ const goToEvent = async (id: number) => {
 .events-section h2 {
   font-size: 1rem;
   margin-bottom: 0px;
+  margin-left: 15px;
 }
 
 .event-card {
@@ -160,13 +213,16 @@ const goToEvent = async (id: number) => {
   height: 150px;
   overflow: hidden;
   border-radius: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 16px 16px;
 }
 
 .event-card-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .event-card-content {
@@ -269,6 +325,7 @@ const goToEvent = async (id: number) => {
 
 .invitations-section h2 {
   margin-bottom: -20px;
+  margin-left: 15px;
 }
 h2 {
   font-size: 1.2rem;
@@ -283,5 +340,6 @@ h2 {
 
 .upcoming-events-section h2 {
   margin-bottom: -20px;
+  margin-left: 15px;
 }
 </style>
