@@ -4,6 +4,9 @@ using MongoDB.Bson;
 using EversayApi.Data;
 using GuestList_lib;
 using Microsoft.AspNetCore.Authorization;
+using Modules.Auth;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace EversayApi.Controllers
 {
@@ -13,9 +16,11 @@ namespace EversayApi.Controllers
     public class GuestListController : ControllerBase
     {
         private readonly IMongoCollection<GuestList>? _guestLists;
-        public GuestListController(MongoDbService mongoDbService)
+        private readonly IMongoCollection<Applicationuser>? _userManager;
+        public GuestListController(MongoDbService mongoDbService, UserManager<IdentityUser> userManager)
         {
             _guestLists = mongoDbService.Database?.GetCollection<GuestList>("guestList");
+            _userManager = (IMongoCollection<Applicationuser>?)userManager;
         }
 
         [HttpGet]
@@ -59,6 +64,28 @@ namespace EversayApi.Controllers
             createdGuestList.CreatedAt = DateTime.UtcNow;
             await _guestLists.InsertOneAsync(createdGuestList);
             return Ok(createdGuestList);
+        }
+
+        [HttpPut("{id}/add-user")]
+        public async Task<ActionResult> AddUserToGuestList(string id, [FromBody] string userIdToAdd)
+        {
+            var filter = Builders<GuestList>.Filter.Eq("guestListId", id);
+            var guestList = _guestLists.Find(filter).FirstOrDefault();
+            if (guestList is null)
+            {
+                return NotFound("Guest list not found");
+            }
+
+            if (guestList.UserIds.Contains(userIdToAdd))
+            {
+                return BadRequest("User already in guest list");
+            }
+
+            guestList.UserIds.Add(userIdToAdd);
+            var update = Builders<GuestList>.Update.Set("User_ids", guestList.UserIds);
+
+            await _guestLists.UpdateOneAsync(filter, update);
+            return Ok(guestList);
         }
     }
 }
