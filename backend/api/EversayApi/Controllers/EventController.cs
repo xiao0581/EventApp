@@ -100,21 +100,53 @@ namespace EversayApi.Controllers
         [HttpGet("byguest/{userId}")]
         public async Task<ActionResult<IEnumerable<Event>>> GetEventsByGuestUserId(string userId)
         {
-            var guestListFilter = Builders<GuestList>.Filter.Eq("User_id", userId);
-            var guestEntries = await _guestList.Find(guestListFilter).ToListAsync();
-
-            if (guestEntries == null || guestEntries.Count == 0)
+            try
             {
-                return NotFound("No events found for this user.");
+                var guestListFilter = Builders<GuestList>.Filter.Eq("user_id", userId);
+                var guestEntries = await _guestList.Find(guestListFilter).ToListAsync();
+
+                if (guestEntries == null || guestEntries.Count == 0)
+                {
+                    return NotFound(new { message = "No events found for this user." });
+                }
+
+                var eventIds = new List<ObjectId>();
+                foreach (var entry in guestEntries)
+                {
+                    if (ObjectId.TryParse(entry.EventId, out ObjectId objectId))
+                    {
+                        eventIds.Add(objectId);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Invalid ObjectId format: {entry.EventId}");
+                    }
+                }
+
+                if (eventIds.Count == 0)
+                {
+                    return BadRequest(new { message = "No valid event IDs found." });
+                }
+
+                var eventFilter = Builders<Event>.Filter.In("_id", eventIds);
+                var events = await _events.Find(eventFilter).ToListAsync();
+
+                return Ok(events);
             }
-
-            var eventIds = guestEntries.Select(g => ObjectId.Parse(g.EventId)).ToList();
-
-            var eventFilter = Builders<Event>.Filter.In("_id", eventIds);
-            var events = await _events.Find(eventFilter).ToListAsync();
-
-            return Ok(events);
+            catch (MongoException ex)
+            {
+                // MongoDB 相关错误，例如连接失败
+                Console.WriteLine($"MongoDB error: {ex.Message}");
+                return StatusCode(500, new { message = "Database error occurred. Please try again later." });
+            }
+            catch (Exception ex)
+            {
+                // 捕获所有其他异常
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+                return StatusCode(500, new { message = "An unexpected error occurred." });
+            }
         }
+
 
         [HttpPost]
         public async Task<ActionResult> CreateEvent([FromBody] Event createdEvent)

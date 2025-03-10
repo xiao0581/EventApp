@@ -2,17 +2,41 @@
   <q-page class="event-details-page">
     <div class="event-header">
       <q-btn flat round icon="arrow_back_ios" color="primary" class="back-btn" to="/home" />
+      <q-btn
+        v-if="canEditEvent"
+        flat
+        round
+        icon="edit"
+        color="primary"
+        class="edit-btn"
+        @click="toggleEdit"
+      />
       <q-img
         v-if="sasToken"
         :src="getEventImage(event?.eventImage)"
         alt="Event Banner"
         class="event-image"
       />
-      <h1>{{ event?.eventTitle }}</h1>
+      <h1 v-if="!isEditing">{{ event?.eventTitle }}</h1>
+      <q-input
+        v-else
+        v-model="editedEvent.eventTitle"
+        label="please enter event title"
+        filled
+        class="q-mt-md"
+      />
+
       <div class="event-info">
-        <p class="event-description" :class="{ expanded: isDescriptionExpanded }">
+        <p v-if="!isEditing" class="event-description" :class="{ expanded: isDescriptionExpanded }">
           {{ event?.eventDescription }}
         </p>
+        <q-input
+          v-else
+          v-model="editedEvent.eventDescription"
+          label="please enter description"
+          filled
+          class="q-mt-md"
+        />
         <q-btn
           v-if="(event?.eventDescription || '').length > 100"
           flat
@@ -33,12 +57,59 @@
         />
 
         <div class="event-details-time">
-          <p class="event-date"><q-icon name="date_range" /> {{ formatDate(event?.eventDate) }}</p>
-          <p class="event-time">
+          <p v-if="!isEditing" class="event-date">
+            <q-icon name="date_range" /> {{ formatDate(event?.eventDate) }}
+          </p>
+          <q-input v-else filled v-model="editedEvent.eventDate">
+            <template v-slot:prepend>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-date v-model="editedEvent.eventDate" mask="YYYY-MM-DD HH:mm">
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+
+            <template v-slot:append>
+              <q-icon name="access_time" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-time v-model="editedEvent.eventDate" mask="YYYY-MM-DD HH:mm" format24h>
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-time>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+
+          <p v-if="!isEditing" class="event-time">
             <q-icon name="schedule" /> {{ formatTime(event?.eventDate) }} -
             {{ formatEndTime(event?.eventDate, event?.duration) }}
           </p>
-          <p class="event-location"><q-icon name="place" /> {{ event?.eventLocation }}</p>
+
+          <q-input
+            v-else
+            type="number"
+            v-model="editedEvent.duration"
+            label="please enter hours"
+            filled
+            class="q-mt-md"
+          />
+
+          <p v-if="!isEditing" class="event-location">
+            <q-icon name="place" /> {{ event?.eventLocation }}
+          </p>
+          <q-input
+            v-else
+            v-model="editedEvent.eventLocation"
+            label="please enter location"
+            filled
+            class="q-mt-md"
+          />
           <div id="map" class="map-container"></div>
         </div>
         <div class="event-preview-video">
@@ -69,7 +140,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
+import { useAuthStore } from 'src/stores/auth'
 import { useRoute } from 'vue-router'
 import { eventStores } from 'src/stores/eventstores'
 import { getReadSasToken } from 'src/utils/azureUploader'
@@ -79,8 +151,13 @@ import 'leaflet/dist/leaflet.css'
 
 const route = useRoute()
 const userEvent = eventStores()
+const authStore = useAuthStore()
 const eventId = computed(() => route.params.id as string)
 const event = computed(() => userEvent.event)
+const currentUserId = computed(() => authStore.user?.userId)
+const canEditEvent = computed(() => currentUserId.value === event.value?.createdBy)
+const isEditing = ref(false)
+const editedEvent = ref({ ...event.value })
 const sasToken = ref('')
 const isDescriptionExpanded = ref(false)
 
@@ -96,6 +173,16 @@ onMounted(async () => {
     }
   }
 })
+
+watch(event, (newEvent) => {
+  if (!isEditing.value) {
+    editedEvent.value = { ...newEvent }
+  }
+})
+
+const toggleEdit = () => {
+  isEditing.value = !isEditing.value
+}
 
 //leaflet map
 const loadMap = (latitude: number, longitude: number) => {
@@ -299,6 +386,17 @@ const getCoordinates = async (address: string) => {
   position: absolute;
   top: 16px;
   left: 16px;
+  z-index: 10;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+}
+
+.edit-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
   z-index: 10;
   background: transparent;
   box-shadow: none;

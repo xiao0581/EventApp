@@ -14,7 +14,7 @@ export const getSasToken = async (): Promise<string> => {
     const requestBody = {
       blobName: '',
       permission: 'w',
-      expiryMinutes: 60,
+      expiryMinutes: 2,
     }
 
     const response = await fetch(`${API_URL}SasToken/generate`, {
@@ -41,7 +41,8 @@ export const getSasToken = async (): Promise<string> => {
 
 export const uploadToAzureBlob = async (file: File): Promise<string> => {
   const sasToken = await getSasToken()
-  const blobUrl = `${file.name}${sasToken}`
+
+  const blobUrl = `${AZURE_URL}${file.name}${sasToken}`
 
   try {
     const response = await fetch(blobUrl, {
