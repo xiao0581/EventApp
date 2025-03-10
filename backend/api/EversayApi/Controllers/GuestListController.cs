@@ -87,5 +87,21 @@ namespace EversayApi.Controllers
             await _guestLists.UpdateOneAsync(filter, update);
             return Ok(guestList);
         }
+
+        [HttpGet("{eventId}/guestlist")]
+        public async Task<ActionResult> GetGuestListByEventId(string eventId)
+        {
+            var filter = Builders<GuestList>.Filter.Eq("event_id", eventId);
+            var guestList = _guestLists.Find(filter).FirstOrDefault();
+            return guestList is not null ? Ok(guestList) : NotFound();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteGuestList(string id)
+        {
+            var filter = Builders<GuestList>.Filter.Eq("guestListId", id);
+            var deleteResult = await _guestLists.DeleteOneAsync(filter);
+            return deleteResult.DeletedCount > 0 ? Ok() : NotFound();
+        }
     }
 }
