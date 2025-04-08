@@ -6,7 +6,6 @@ using GuestList_lib;
 using Microsoft.AspNetCore.Authorization;
 using Modules.Auth;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 
 namespace EversayApi.Controllers
 {
@@ -91,8 +90,16 @@ namespace EversayApi.Controllers
         [HttpGet("{eventId}/guestlist")]
         public async Task<ActionResult> GetGuestListByEventId(string eventId)
         {
-            var filter = Builders<GuestList>.Filter.Eq("event_id", eventId);
-            var guestList = _guestLists.Find(filter).FirstOrDefault();
+            // Convert event ID (string) to ObjectId if necessary
+            if (!ObjectId.TryParse(eventId, out var objectId))
+            {
+                return BadRequest("Invalid Event ID format.");
+            }
+
+            // Query GuestList using string representation of ObjectId
+            var filter = Builders<GuestList>.Filter.Eq("event_id", objectId.ToString());
+            var guestList = await _guestLists.Find(filter).FirstOrDefaultAsync();
+
             return guestList is not null ? Ok(guestList) : NotFound();
         }
 
