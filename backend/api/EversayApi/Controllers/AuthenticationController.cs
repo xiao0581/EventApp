@@ -10,7 +10,6 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using User_lib;
-using EversayApi.Services;
 
 namespace EversayApi.Controllers
 {
@@ -154,7 +153,6 @@ namespace EversayApi.Controllers
             }
             catch (Exception ex)
             {
-
                 Console.WriteLine(ex.Message);
                 return new LoginResponse { Success = false, Message = ex.Message };
             }
