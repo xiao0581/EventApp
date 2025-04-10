@@ -96,7 +96,7 @@ const isActive = (path: string): boolean => {
 }
 
 .active-btn {
-  background-color: #6a7bff;
+  background-color: #6c3baa;
   color: white;
   width: 60px;
   height: 30px;

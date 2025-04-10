@@ -97,6 +97,7 @@ namespace EversayApi.Controllers
             return await _events.Find(filter).ToListAsync();
         }
 
+
         [HttpGet("byguest/{userId}")]
         public async Task<ActionResult<IEnumerable<Event>>> GetEventsByGuestUserId(string userId)
         {
@@ -134,14 +135,12 @@ namespace EversayApi.Controllers
                 return Ok(events);
             }
             catch (MongoException ex)
-            {
-                // MongoDB 相关错误，例如连接失败
+            {             
                 Console.WriteLine($"MongoDB error: {ex.Message}");
                 return StatusCode(500, new { message = "Database error occurred. Please try again later." });
             }
             catch (Exception ex)
             {
-                // 捕获所有其他异常
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 return StatusCode(500, new { message = "An unexpected error occurred." });
             }

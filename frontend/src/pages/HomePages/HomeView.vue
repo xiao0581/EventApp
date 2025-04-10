@@ -169,7 +169,7 @@ const events = computed(() => {
 }
 
 .homebutton {
-  background-color: #6a7bff;
+  background-color: #6c3baa;
   color: white;
   font-weight: bold;
   padding: 0.5rem 5rem;
