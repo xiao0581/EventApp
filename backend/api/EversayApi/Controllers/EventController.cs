@@ -166,14 +166,15 @@ namespace EversayApi.Controllers
             {
                 createdEvent.CreatedBy = userId;
             }
+
             createdEvent.CreatedAt = DateTime.UtcNow;
             createdEvent.ExpiredAt = createdEvent.EventDate.AddDays(100);
-
             await _events.InsertOneAsync(createdEvent);
+            var insertedEventId = createdEvent.eventId;
 
             var guestEntry = new GuestList
             {
-                EventId = createdEvent.eventId.ToString(),
+                EventId = insertedEventId.ToString(),
                 UserId = userId.ToString(),
                 IsAttending = true,
                 GuestListName = createdEvent.EventTitle,

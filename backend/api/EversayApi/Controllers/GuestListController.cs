@@ -6,7 +6,6 @@ using GuestList_lib;
 using Microsoft.AspNetCore.Authorization;
 using Modules.Auth;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 
 namespace EversayApi.Controllers
 {
@@ -16,11 +15,11 @@ namespace EversayApi.Controllers
     public class GuestListController : ControllerBase
     {
         private readonly IMongoCollection<GuestList>? _guestLists;
-        private readonly IMongoCollection<Applicationuser>? _userManager;
-        public GuestListController(MongoDbService mongoDbService, UserManager<IdentityUser> userManager)
+        //private readonly IMongoCollection<Applicationuser>? _userManager;
+        public GuestListController(MongoDbService mongoDbService/*, UserManager<IdentityUser> userManager*/)
         {
             _guestLists = mongoDbService.Database?.GetCollection<GuestList>("guestList");
-            _userManager = (IMongoCollection<Applicationuser>?)userManager;
+            //_userManager = (IMongoCollection<Applicationuser>?)userManager;
         }
 
         [HttpGet]
@@ -88,13 +87,27 @@ namespace EversayApi.Controllers
             return Ok(guestList);
         }
 
-        [HttpGet("{eventId}/guestlist")]
-        public async Task<ActionResult> GetGuestListByEventId(string eventId)
+        [HttpGet("{eventId}/guestlist")] //done to test if the route is messed up
+        public IActionResult TestRoute(string eventId)
         {
-            var filter = Builders<GuestList>.Filter.Eq("event_id", eventId);
-            var guestList = _guestLists.Find(filter).FirstOrDefault();
-            return guestList is not null ? Ok(guestList) : NotFound();
+            return Ok($"Route works! eventId: {eventId}");
         }
+
+        //[HttpGet("{eventId}/guestlist")]
+        //public async Task<ActionResult> GetGuestListByEventId(string eventId)
+        //{
+        //    // Convert event ID (string) to ObjectId if necessary
+        //    if (!ObjectId.TryParse(eventId, out var objectId))
+        //    {
+        //        return BadRequest("Invalid Event ID format.");
+        //    }
+
+        //    // Query GuestList using string representation of ObjectId
+        //    var filter = Builders<GuestList>.Filter.Eq("event_id", objectId.ToString());
+        //    var guestList = await _guestLists.Find(filter).FirstOrDefaultAsync();
+
+        //    return guestList is not null ? Ok(guestList) : NotFound();
+        //}
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteGuestList(string id)
