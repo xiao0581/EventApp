@@ -3,6 +3,15 @@
     <div class="event-header">
       <q-btn flat round icon="arrow_back_ios" color="primary" class="back-btn" to="/home" />
       <q-btn
+        v-if="isEditing"
+        flat
+        round
+        icon="check"
+        color="positive"
+        class="save-btn"
+        @click="updateEvent"
+      />
+      <q-btn
         v-if="canEditEvent"
         flat
         round
@@ -12,30 +21,47 @@
         @click="toggleEdit"
       />
       <q-img
-        v-if="sasToken"
+        v-if="sasToken && !isEditing"
         :src="getEventImage(event?.eventImage)"
         alt="Event Banner"
         class="event-image"
       />
-      <h1 v-if="!isEditing">{{ event?.eventTitle }}</h1>
-      <q-input
-        v-else
-        v-model="editedEvent.eventTitle"
-        label="please enter event title"
-        filled
-        class="q-mt-md"
-      />
+
+      <div v-else class="q-mt-md">
+        <input
+          type="file"
+          accept="image/*"
+          ref="imageInputRef"
+          class="hidden-file-input"
+          @change="onImageSelected"
+        />
+        <q-img
+          :src="getEventImage(editedEvent.eventImage)"
+          class="event-image clickable"
+          @click="triggerImageInput"
+        />
+      </div>
+
+      <h1 v-if="!isEditing" class="event-title-display">{{ event?.eventTitle }}</h1>
 
       <div class="event-info">
+        <q-input
+          v-if="isEditing"
+          v-model="editedEvent.eventTitle"
+          label="please enter new event title"
+          filled
+          class="edit-field"
+        />
+
         <p v-if="!isEditing" class="event-description" :class="{ expanded: isDescriptionExpanded }">
           {{ event?.eventDescription }}
         </p>
         <q-input
           v-else
           v-model="editedEvent.eventDescription"
-          label="please enter description"
+          label="please enter new description"
           filled
-          class="q-mt-md"
+          class="q-mt-md edit-field"
         />
         <q-btn
           v-if="(event?.eventDescription || '').length > 100"
@@ -60,7 +86,7 @@
           <p v-if="!isEditing" class="event-date">
             <q-icon name="date_range" /> {{ formatDate(event?.eventDate) }}
           </p>
-          <q-input v-else filled v-model="editedEvent.eventDate">
+          <q-input v-else filled v-model="editedEvent.eventDate" class="edit-field">
             <template v-slot:prepend>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -95,9 +121,9 @@
             v-else
             type="number"
             v-model="editedEvent.duration"
-            label="please enter hours"
+            label="please enter new hours"
             filled
-            class="q-mt-md"
+            class="q-mt-md edit-field"
           />
 
           <p v-if="!isEditing" class="event-location">
@@ -106,19 +132,37 @@
           <q-input
             v-else
             v-model="editedEvent.eventLocation"
-            label="please enter location"
+            label="please enter new location"
             filled
-            class="q-mt-md"
+            class="q-mt-md edit-field"
           />
           <div id="map" class="map-container"></div>
         </div>
         <div class="event-preview-video">
           <p class="event-preview">Catch the celebration vibe with a quick preview</p>
           <q-video
-            v-if="sasToken"
+            v-if="sasToken && !isEditing"
             :src="getEventvideo(event?.eventPreview)"
             class="event-video"
           ></q-video>
+
+          <div v-else class="q-mt-md">
+            <input
+              type="file"
+              accept="video/*"
+              ref="videoInputRef"
+              class="hidden-file-input"
+              @change="onVideoSelected"
+            />
+            <div class="video-wrapper q-mt-sm" @click="triggerVideoInput">
+              <q-video
+                v-if="editedEvent.eventPreview"
+                :src="getEventvideo(editedEvent.eventPreview)"
+                class="event-video"
+              />
+              <div class="video-overlay" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -145,6 +189,7 @@ import { useAuthStore } from 'src/stores/auth'
 import { useRoute } from 'vue-router'
 import { eventStores } from 'src/stores/eventstores'
 import { getReadSasToken } from 'src/utils/azureUploader'
+import { uploadToAzureBlob } from 'src/utils/azureUploader'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 /* import GuestListcompo from 'src/components/GuestListcompo.vue' */
@@ -160,6 +205,8 @@ const isEditing = ref(false)
 const editedEvent = ref({ ...event.value })
 const sasToken = ref('')
 const isDescriptionExpanded = ref(false)
+const selectedImageFile = ref<File | null>(null)
+const selectedVideoFile = ref<File | null>(null)
 
 onMounted(async () => {
   await userEvent.fetchEventById(eventId.value)
@@ -175,13 +222,68 @@ onMounted(async () => {
 })
 
 watch(event, (newEvent) => {
-  if (!isEditing.value) {
-    editedEvent.value = { ...newEvent }
+  if (!isEditing.value && newEvent) {
+    const date = new Date(newEvent.eventDate)
+    const formattedDate = date.toISOString().slice(0, 16).replace('T', ' ')
+    editedEvent.value = { ...newEvent, eventDate: formattedDate }
   }
 })
 
+// clickable image input
+const imageInputRef = ref<HTMLInputElement | null>(null)
+
+const triggerImageInput = () => {
+  imageInputRef.value?.click()
+}
+
+const onImageSelected = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    selectedImageFile.value = file
+    editedEvent.value.eventImage = file
+  }
+}
+
+// clickable video input
+const videoInputRef = ref<HTMLInputElement | null>(null)
+
+const triggerVideoInput = () => {
+  videoInputRef.value?.click()
+}
+
+const onVideoSelected = (e: Event) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (file) {
+    selectedVideoFile.value = file
+    editedEvent.value.eventPreview = file
+  }
+}
+
 const toggleEdit = () => {
   isEditing.value = !isEditing.value
+}
+
+const updateEvent = async () => {
+  try {
+    const updatedData = { ...editedEvent.value }
+
+    if (editedEvent.value.eventImage instanceof File) {
+      const uploadedImageUrl = await uploadToAzureBlob(editedEvent.value.eventImage)
+      updatedData.eventImage = uploadedImageUrl
+    }
+
+    if (editedEvent.value.eventPreview instanceof File) {
+      const uploadedVideoUrl = await uploadToAzureBlob(editedEvent.value.eventPreview)
+      updatedData.eventPreview = uploadedVideoUrl
+    }
+
+    await userEvent.updateEvent(eventId.value, updatedData)
+    await userEvent.fetchEventById(eventId.value)
+    isEditing.value = false
+  } catch (err) {
+    console.error('Error updating event:', err)
+  }
 }
 
 //leaflet map
@@ -404,7 +506,56 @@ const getCoordinates = async (address: string) => {
   padding: 0;
 }
 
+.save-btn {
+  position: absolute;
+  top: 16px;
+  right: 56px;
+  z-index: 10;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+}
+
 .View-more-btn {
   margin-left: 120px;
+}
+.hidden-file-input {
+  display: none;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  height: 200px;
+}
+
+.video-wrapper .event-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  pointer-events: none; /* Prevent interaction with the video */
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  border-radius: 20px;
+  background-color: transparent;
+  z-index: 2;
+}
+
+.edit-field {
+  margin-top: 12px;
+  margin-bottom: 12px;
 }
 </style>

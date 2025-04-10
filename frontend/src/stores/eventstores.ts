@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { uploadToAzureBlob } from 'src/utils/azureUploader'
+import axios from 'axios'
 const API_URL = import.meta.env.VITE_API_BASE_URL
 
 interface Event {
@@ -54,10 +55,9 @@ export const eventStores = defineStore('eventstore', () => {
       const formattedEventDate = eventDateObj.toISOString()
       const createdBy = ''
 
-      const response = await fetch(`${API_URL}Event`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
+      const response = await axios.post(
+        `${API_URL}Event`,
+        {
           eventTitle: createEvents.eventTitle,
           eventDescription: createEvents.eventDescription,
           eventDate: formattedEventDate,
@@ -68,15 +68,25 @@ export const eventStores = defineStore('eventstore', () => {
           eventPreview: previewUrl,
           eventCategory: createEvents.eventCategory,
           createdBy: createdBy,
-        }),
-      })
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
 
-      if (!response.ok) {
+      return await response.data()
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message || error.message
+        throw new Error(message)
+      } else if (error instanceof Error) {
+        throw new Error(error.message)
+      } else {
         throw new Error('Failed to create event')
       }
-      return await response.json()
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to create event')
     }
   }
 
@@ -87,18 +97,19 @@ export const eventStores = defineStore('eventstore', () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}event/byguest/${userId}`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.get(`${API_URL}event/byguest/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch events')
-      }
-
-      userEvents.value = await response.json()
+      userEvents.value = response.data
     } catch (error) {
-      console.error('Error fetching events:', error)
+      if (axios.isAxiosError(error)) {
+        console.error('Axios error fetching events:', error.response?.data || error.message)
+      } else {
+        console.error('Unexpected error fetching events:', error)
+      }
     }
   }
 
@@ -106,32 +117,91 @@ export const eventStores = defineStore('eventstore', () => {
     const existingEvent = userEvents.value.find((event) => event.eventId === eventId)
     if (existingEvent) {
       event.value = existingEvent
-
       return existingEvent
     }
 
     try {
-      const response = await fetch(`${API_URL}Event/${eventId}`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.get<Event>(`${API_URL}Event/${eventId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch event details')
-      }
-
-      const fetchedEvent = await response.json()
+      const fetchedEvent = response.data
       event.value = fetchedEvent
-
       userEvents.value.push(fetchedEvent)
 
       console.log('Event fetched from API:', fetchedEvent)
       return fetchedEvent
     } catch (error) {
-      console.error('Error fetching event details:', error)
+      if (axios.isAxiosError(error)) {
+        console.error('Axios error:', error.response?.data || error.message)
+      } else {
+        console.error('Unexpected error:', error)
+      }
       return null
     }
   }
 
-  return { event, creation, getEventsByuser, fetchEventById, userEvents }
+  const updateEvent = async (eventId: string, updatedEvent: Partial<Event>) => {
+    try {
+      let imageUrl = typeof updatedEvent.eventImage === 'string' ? updatedEvent.eventImage : ''
+      let previewUrl =
+        typeof updatedEvent.eventPreview === 'string' ? updatedEvent.eventPreview : ''
+
+      if (updatedEvent.eventImage instanceof File) {
+        imageUrl = await uploadToAzureBlob(updatedEvent.eventImage)
+      }
+
+      if (updatedEvent.eventPreview instanceof File) {
+        previewUrl = await uploadToAzureBlob(updatedEvent.eventPreview)
+      }
+
+      let formattedDate = ''
+      if (updatedEvent.eventDate) {
+        formattedDate = new Date(
+          updatedEvent.eventDate.replace(' ', 'T') + ':00.000Z',
+        ).toISOString()
+      }
+
+      const response = await axios.put<Event>(
+        `${API_URL}Event/${eventId}`,
+        {
+          eventTitle: updatedEvent.eventTitle,
+          eventDescription: updatedEvent.eventDescription,
+          eventDate: formattedDate,
+          duration: updatedEvent.duration,
+          eventLocation: updatedEvent.eventLocation,
+          eventImage: imageUrl,
+          eventPreview: previewUrl,
+          eventCategory: updatedEvent.eventCategory,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      const updated = response.data
+      event.value = updated
+
+      const index = userEvents.value.findIndex((e) => e.eventId === updated.eventId)
+      if (index !== -1) {
+        userEvents.value[index] = updated
+      }
+
+      return updated
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Axios error:', error.response?.data || error.message)
+        throw new Error(error.message)
+      } else {
+        throw new Error('Failed to update event')
+      }
+    }
+  }
+
+  return { event, creation, getEventsByuser, fetchEventById, userEvents, updateEvent }
 })

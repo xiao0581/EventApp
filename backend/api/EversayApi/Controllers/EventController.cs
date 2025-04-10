@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using User_lib;
 using GuestList_lib;
+using EversayApi.Dtos;
 
 namespace EversayApi.Controllers
 {
@@ -187,14 +188,52 @@ namespace EversayApi.Controllers
             return CreatedAtAction(nameof(GetEventById), new { id = createdEvent.eventId }, createdEvent);
         }
 
-        [HttpPut]
-        public async Task<ActionResult> UpdateEvent(Event updatedEvent)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateEvent(string id, [FromBody] UpdateEventDto updatedFields)
         {
-            var filter = Builders<Event>.Filter.Eq("eventId", updatedEvent.eventId);
-            await _events.ReplaceOneAsync(filter, updatedEvent);
-            return Ok();
-        }
+            if (updatedFields == null)
+                return BadRequest("No update data provided.");
 
+            var filter = Builders<Event>.Filter.Eq(e => e.eventId, id);
+            var updates = new List<UpdateDefinition<Event>>();
+
+            if (updatedFields.EventTitle != null)
+                updates.Add(Builders<Event>.Update.Set(e => e.EventTitle, updatedFields.EventTitle));
+
+            if (updatedFields.EventDescription != null)
+                updates.Add(Builders<Event>.Update.Set(e => e.EventDescription, updatedFields.EventDescription));
+
+            if (updatedFields.EventDate.HasValue)
+                updates.Add(Builders<Event>.Update.Set(e => e.EventDate, updatedFields.EventDate.Value));
+
+            if (updatedFields.Duration != null)
+                updates.Add(Builders<Event>.Update.Set(e => e.Duration, updatedFields.Duration));
+
+            if (updatedFields.EventLocation != null)
+                updates.Add(Builders<Event>.Update.Set(e => e.EventLocation, updatedFields.EventLocation));
+
+            if (updatedFields.EventImage != null)
+                updates.Add(Builders<Event>.Update.Set(e => e.EventImage, updatedFields.EventImage));
+
+            if (updatedFields.EventPreview != null)
+                updates.Add(Builders<Event>.Update.Set(e => e.EventPreview, updatedFields.EventPreview));
+
+            if (updatedFields.EventCategory != null)
+                updates.Add(Builders<Event>.Update.Set(e => e.EventCategory, updatedFields.EventCategory));
+
+            if (!updates.Any())
+                return BadRequest("No valid fields to update.");
+
+            var updateDefinition = Builders<Event>.Update.Combine(updates);
+            var result = await _events.UpdateOneAsync(filter, updateDefinition);
+
+            if (result.MatchedCount == 0)
+                return NotFound("Event not found");
+
+            
+            var updatedEvent = await _events.Find(filter).FirstOrDefaultAsync();
+            return Ok(updatedEvent);
+        }
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteEvent(string id)
         {
