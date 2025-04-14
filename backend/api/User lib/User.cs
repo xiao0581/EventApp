@@ -6,7 +6,7 @@ namespace User_lib
     public class User
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
+        [BsonRepresentation(BsonType.String)]
         public string? userId { get; set; }
 
         [BsonElement("user_name"), BsonRepresentation(BsonType.String)]

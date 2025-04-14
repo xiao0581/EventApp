@@ -87,6 +87,18 @@ namespace EversayApi.Controllers
                     Success = false
                 };
 
+                var mongoUser = new User
+                {
+                    userId = userExists.Id.ToString(),
+                    UserName = request.Name,
+                    Email = request.Email,
+                    UserRole = UserType.Guest,
+                    ProfilePicture = "",
+                    PasswordHash = ""
+                };
+
+                await _userService.RegisterUser(mongoUser, request); ;
+
                 return new RegisterResponse
                 {
                     Success = true,

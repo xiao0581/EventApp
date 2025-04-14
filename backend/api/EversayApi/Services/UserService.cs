@@ -27,7 +27,7 @@ namespace EversayApi.Services
             user.UserName = registerRequest.Name;
             user.Email = registerRequest.Email;
             user.UserRole = UserType.Guest;
-            user.ProfilePicture = "https://eversay.dk/wp-content/uploads/2024/12/Frame-2694-2.png";
+            user.ProfilePicture = "";
             user.PasswordHash = _passwordHasher.HashPassword(user, registerRequest.Password);
 
             await _users.InsertOneAsync(user);

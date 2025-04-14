@@ -44,25 +44,60 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { eventStores } from 'src/stores/eventstores'
+import { getReadSasToken } from 'src/utils/azureUploader'
+
+const sasToken = ref<string>('')
 
 interface Guest {
-  id: number
+  id: string
   name: string
   role: string
   avatar?: string
 }
 
-const props = defineProps<{ guests: Guest[]; grouped?: boolean }>()
+const props = defineProps<{
+  eventId: string
+  grouped?: boolean
+}>()
+
+const eventStore = eventStores()
+const guests = ref<Guest[]>([])
+
+onMounted(async () => {
+  try {
+    sasToken.value = await getReadSasToken()
+    const guestIds = await eventStore.getGuestListByEventId(props.eventId)
+
+    const validIds = guestIds.filter((id) => id && id.trim() !== '')
+
+    const uniqueIds = [...new Set(validIds)]
+
+    const users = await Promise.all(uniqueIds.map((id) => eventStore.getUserInfoById(id)))
+
+    guests.value = users.filter(Boolean).map((u) => ({
+      id: u!.userId,
+      name: u!.userName,
+      role: u!.userRole,
+      avatar: buildImageUrl(u!.profilePicture),
+    }))
+  } catch (err) {
+    console.error('Failed to load guests:', err)
+  }
+})
+
+const buildImageUrl = (url: string | undefined): string => {
+  if (!url) return '/assets/pic/luca.png'
+  return `${url}${sasToken.value}`
+}
 
 const groupedGuests = computed(() => {
-  if (!props.grouped) {
-    return {}
-  }
+  if (!props.grouped) return {}
 
   const groups: Record<string, Guest[]> = {}
 
-  props.guests.forEach((guest) => {
+  guests.value.forEach((guest) => {
     const role = guest.role || 'Unknown'
     if (!groups[role]) {
       groups[role] = []
@@ -89,13 +124,11 @@ const sendMessage = (guest: Guest) => {
   margin: 12px 12px;
   padding: 1px;
 }
-
 .text-weight-medium {
   margin-top: -10px;
   font-size: 18px;
   font-weight: bold;
 }
-
 .tag-button {
   font-size: 10px;
   padding: 2px 6px;

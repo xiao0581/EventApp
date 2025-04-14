@@ -20,7 +20,13 @@ interface Event {
   createdBy: string
   guests: string[]
 }
-
+interface PublicUser {
+  userId: string
+  userName: string
+  email: string
+  profilePicture: string
+  userRole: string
+}
 export const eventStores = defineStore('eventstore', () => {
   const event = ref<Event | null>(null)
   const authStore = useAuthStore()
@@ -77,7 +83,7 @@ export const eventStores = defineStore('eventstore', () => {
         },
       )
 
-      return await response.data()
+      return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message || error.message
@@ -203,5 +209,55 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
-  return { event, creation, getEventsByuser, fetchEventById, userEvents, updateEvent }
+  const getGuestListByEventId = async (eventId: string) => {
+    try {
+      const response = await axios.get<string[]>(`${API_URL}GuestList/${eventId}/userids`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const guestUserIds = response.data
+
+      if (event.value && event.value.eventId === eventId) {
+        event.value.guests = guestUserIds
+      }
+
+      const index = userEvents.value.findIndex((e) => e.eventId === eventId)
+      if (index !== -1 && userEvents.value[index]) {
+        userEvents.value[index].guests = guestUserIds
+      }
+
+      return guestUserIds
+    } catch (error) {
+      console.error('Failed to fetch guest list:', error)
+      return []
+    }
+  }
+
+  const getUserInfoById = async (userId: string): Promise<PublicUser | null> => {
+    try {
+      const response = await axios.get<PublicUser>(`${API_URL}user/id/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      return response.data
+    } catch (error) {
+      console.error(`Failed to fetch user info for ID ${userId}:`, error)
+      return null
+    }
+  }
+
+  return {
+    event,
+    creation,
+    getEventsByuser,
+    fetchEventById,
+    userEvents,
+    updateEvent,
+    getGuestListByEventId,
+    getUserInfoById,
+  }
 })

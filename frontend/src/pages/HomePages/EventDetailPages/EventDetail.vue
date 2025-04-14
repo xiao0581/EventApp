@@ -167,9 +167,9 @@
       </div>
     </div>
 
-    <!-- <div class="event-section">
-      <h6>Our guests ({{ event?.guests.length || 0 }})</h6>
-      <GuestListcompo v-if="event" :guests="limitedGuests" :grouped="false" />
+    <div class="event-section">
+      <h6 class="q-mb-sm">Our Guests</h6>
+      <GuestListcompo :event-id="eventId" :grouped="false" />
       <q-btn
         flat
         label="View all guests"
@@ -177,7 +177,7 @@
         :to="`/event/${event?.eventId}/guests`"
         style="text-transform: none"
       />
-    </div> -->
+    </div>
 
     <router-view />
   </q-page>
@@ -192,7 +192,7 @@ import { getReadSasToken } from 'src/utils/azureUploader'
 import { uploadToAzureBlob } from 'src/utils/azureUploader'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-/* import GuestListcompo from 'src/components/GuestListcompo.vue' */
+import GuestListcompo from 'src/components/GuestListcompo.vue'
 
 const route = useRoute()
 const userEvent = eventStores()
@@ -361,19 +361,15 @@ const getCoordinates = async (address: string) => {
     return null
   }
 
-  console.log(`Fetching coordinates for: ${address}`)
-
   try {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`,
     )
     const data = await response.json()
 
-    console.log('Nominatim API Response:', data)
-
     if (data.length > 0) {
       const location = data[0]
-      console.log(`Coordinates found: lat=${location.lat}, lon=${location.lon}`)
+
       return { lat: parseFloat(location.lat), lon: parseFloat(location.lon) }
     } else {
       console.error('Geocoding failed: No results found')
