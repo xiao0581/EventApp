@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 const API_URL = import.meta.env.VITE_API_BASE_URL
 import { ref, computed } from 'vue'
-
+import { jwtDecode } from 'jwt-decode'
 interface User {
   userId: string
   email: string
@@ -11,10 +11,25 @@ interface User {
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
 
+  function isTokenExpired(token: string): boolean {
+    try {
+      const decoded: { exp: number } = jwtDecode(token)
+      const currentTime = Date.now() / 1000
+      return decoded.exp < currentTime
+    } catch {
+      return true
+    }
+  }
+
   const loadUser = () => {
     const storedUser = localStorage.getItem('user')
     if (storedUser) {
-      user.value = JSON.parse(storedUser)
+      const parsedUser = JSON.parse(storedUser)
+      if (!isTokenExpired(parsedUser.token)) {
+        user.value = parsedUser
+      } else {
+        logout()
+      }
     }
   }
 
