@@ -1,5 +1,6 @@
 <template>
-  <q-btn v-if="step === 1" flat class="back-btn" icon="arrow_back_ios" to="/home"></q-btn>
+  <q-btn v-if="step === 1" flat class="back-btn" icon="arrow_back_ios" to="/home" />
+
   <q-page class="event-page">
     <div class="header">
       <div class="title">
@@ -11,39 +12,42 @@
       <div v-if="step === 1">
         <div class="section-title">Create warm memories</div>
 
-        <div class="input-label">Select Event Poster</div>
-        <div class="Poster">
+        <div class="upload-area">
           <q-file
             class="file-input"
             v-model="eventData.eventImage"
-            label="Tap to open the gallery"
             accept="image/*"
             borderless
             @update:model-value="updatePosterPreview"
           />
-          <img v-if="posterPreviewUrl" :src="posterPreviewUrl" class="preview-image" />
+          <div class="upload-content">
+            <img v-if="posterPreviewUrl" :src="posterPreviewUrl" class="preview-image" />
+            <q-btn v-else label="Add Cover" class="add-cover-button" unelevated />
+          </div>
         </div>
 
-        <div class="input-label">Add Event Preview</div>
-        <div class="Preview">
+        <div class="upload-area">
           <q-file
             class="file-input"
             v-model="eventData.eventPreview"
-            label="Tap to open the gallery"
             accept="video/*"
             borderless
             @update:model-value="updatePreviewVideo"
           />
-          <video v-if="previewVideoUrl" class="preview-video" controls>
-            <source :src="previewVideoUrl" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          <div class="upload-content">
+            <video v-if="previewVideoUrl" class="preview-image" autoplay loop muted playsinline>
+              <source :src="previewVideoUrl" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <q-btn v-else label="Add Preview" class="add-cover-button" unelevated />
+          </div>
         </div>
+
         <div class="input-label">Date</div>
         <div class="EventDate" style="max-width: 300px">
           <q-input filled v-model="eventData.eventDate">
             <template v-slot:prepend>
-              <q-icon name="event" class="cursor-pointer">
+              <q-icon name="event" class="cursor-pointer" color="primary">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                   <q-date v-model="eventData.eventDate" mask="YYYY-MM-DD HH:mm">
                     <div class="row items-center justify-end">
@@ -55,7 +59,7 @@
             </template>
 
             <template v-slot:append>
-              <q-icon name="access_time" class="cursor-pointer">
+              <q-icon name="access_time" class="cursor-pointer" color="primary">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                   <q-time v-model="eventData.eventDate" mask="YYYY-MM-DD HH:mm" format24h>
                     <div class="row items-center justify-end">
@@ -67,6 +71,7 @@
             </template>
           </q-input>
         </div>
+
         <div class="input-label">Title</div>
         <q-input
           v-model="eventData.eventTitle"
@@ -74,13 +79,15 @@
           filled
           class="q-mt-md"
         />
+
         <div class="input-label">Category</div>
         <q-input
           v-model="eventData.eventCategory"
-          label="please enter event title"
+          label="please enter category"
           filled
           class="q-mt-md"
         />
+
         <div class="input-label">Duration</div>
         <q-input
           type="number"
@@ -97,6 +104,7 @@
           filled
           class="q-mt-md"
         />
+
         <div class="input-label">Description</div>
         <q-input
           v-model="eventData.eventDescription"
@@ -106,6 +114,7 @@
         />
       </div>
 
+      <!-- Steps 2 and 3 can remain unchanged -->
       <div v-if="step === 2">
         <div class="section-title">Who will help create warm memories</div>
         <q-input v-model="hostEmail" label="Enter host email" filled class="q-mt-md" />
@@ -122,7 +131,6 @@
 
     <div class="footer" :class="{ 'footer-right': step === 1, 'footer-default': step > 1 }">
       <q-btn v-if="step > 1" label="Back" outline @click="prevStep" />
-
       <q-btn
         v-if="step === 1"
         label="Save"
@@ -130,7 +138,6 @@
         class="btn-large"
         @click="eventcreate"
       />
-
       <q-btn v-if="step > 1" label="Next" color="primary" :disable="step === 3" @click="nextStep" />
     </div>
   </q-page>
@@ -254,82 +261,95 @@ const prevStep = () => {
 .title {
   font-size: 1.5rem;
   font-weight: bold;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 4px;
+  color: #6c3baa;
 }
 
 .content {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   width: 100%;
   padding-top: 20px;
 }
+
 .section-title {
   font-size: 1.2rem;
   font-weight: bold;
+  margin-bottom: 10px;
+  color: #6c3baa;
 }
+
 .input-label {
   margin-top: 15px;
   font-size: 0.9rem;
+  color: #6c3baa;
 }
 
-.Poster,
-.Preview {
+.upload-area {
   position: relative;
-  border: 2px dashed #8c8c8c;
-  padding: 10px;
   width: 100%;
-  height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.02);
+  height: 150px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #a77ce7, #c3a5ff);
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.upload-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-cover-button {
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6d28d9, #a78bfa);
+  color: white;
+  text-transform: none;
+  padding: 10px 20px;
 }
 
 .file-input {
   position: absolute;
   width: 100%;
   height: 100%;
+  z-index: 2;
   opacity: 0;
   cursor: pointer;
-  z-index: 2;
 }
 
-.preview-image,
-.preview-video {
-  position: absolute;
-  top: 0;
-  left: 0;
+.preview-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 1;
-  pointer-events: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
 }
 
 .EventDate {
   margin-top: 15px;
 }
+
 .footer {
   width: 100%;
   display: flex;
   padding: 20px;
 }
-
 .footer-right {
   justify-content: flex-end;
 }
-
 .footer-default {
   justify-content: space-between;
 }
-
 .btn-large {
   font-size: 1rem;
   width: 160px;
@@ -338,7 +358,6 @@ const prevStep = () => {
   width: 100%;
   margin-top: 15px;
 }
-
 .back-btn {
   position: absolute;
   top: 16px;

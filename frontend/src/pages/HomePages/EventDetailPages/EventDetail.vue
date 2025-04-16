@@ -36,6 +36,7 @@
           @change="onImageSelected"
         />
         <q-img
+          v-if="sasToken"
           :src="getEventImage(editedEvent.eventImage)"
           class="event-image clickable"
           @click="triggerImageInput"
