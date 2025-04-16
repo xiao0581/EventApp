@@ -145,6 +145,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import { eventStores } from 'src/stores/eventstores'
 import { Notify } from 'quasar'
 const useEventStore = eventStores()
@@ -161,7 +162,7 @@ const eventData = reactive({
   expiredAt: '',
   eventCategory: '',
 })
-
+const router = useRouter()
 const loading = ref<boolean>(false)
 const hostEmail = ref<string>('')
 const guests = ref<string[]>([])
@@ -180,7 +181,7 @@ const updatePosterPreview = (file: File | null) => {
 const eventcreate = async (): Promise<void> => {
   loading.value = true
   try {
-    await useEventStore.creation({
+    const createdEvent = await useEventStore.creation({
       eventTitle: eventData.eventTitle,
       eventDescription: eventData.eventDescription,
       eventDate: eventData.eventDate,
@@ -196,6 +197,8 @@ const eventcreate = async (): Promise<void> => {
       type: 'positive',
       message: 'Create successful!',
     })
+
+    await router.push(`/event/${createdEvent.eventId}`)
   } catch (error: unknown) {
     const message = (error as Error).message || 'An unknown error occurred.'
     Notify.create({

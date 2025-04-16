@@ -94,6 +94,8 @@ const events = computed(() => {
 <style scoped>
 .event-card {
   display: flex;
+  width: auto;
+  height: 145px;
   flex-direction: row;
   align-items: center;
   margin: 12px;

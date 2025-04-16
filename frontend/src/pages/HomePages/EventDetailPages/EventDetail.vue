@@ -138,6 +138,9 @@
             class="q-mt-md edit-field"
           />
           <div id="map" class="map-container"></div>
+          <p v-if="event && !event.eventLocation" class="text-center text-grey">
+            📍 No location provided for this event.
+          </p>
         </div>
         <div class="event-preview-video">
           <p class="event-preview">Catch the celebration vibe with a quick preview</p>
@@ -218,7 +221,11 @@ onMounted(async () => {
 
     if (coordinates) {
       loadMap(coordinates.lat, coordinates.lon)
+    } else {
+      loadMap(51.505, -0.09)
     }
+  } else {
+    loadMap(51.505, -0.09)
   }
 })
 
@@ -295,7 +302,7 @@ const loadMap = (latitude: number, longitude: number) => {
     attribution: '',
   }).addTo(map)
 
-  L.marker([latitude, longitude]).addTo(map).bindPopup('Event location').openPopup()
+  L.marker([latitude, longitude]).addTo(map).openPopup().bindPopup('Event location')
 }
 
 const getEventImage = (image: string | File | null | undefined): string => {
@@ -554,5 +561,11 @@ const getCoordinates = async (address: string) => {
 .edit-field {
   margin-top: 12px;
   margin-bottom: 12px;
+}
+
+.text-grey {
+  color: #999;
+  font-style: italic;
+  margin-top: 10px;
 }
 </style>
