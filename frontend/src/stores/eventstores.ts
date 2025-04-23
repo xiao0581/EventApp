@@ -137,7 +137,6 @@ export const eventStores = defineStore('eventstore', () => {
       event.value = fetchedEvent
       userEvents.value.push(fetchedEvent)
 
-      console.log('Event fetched from API:', fetchedEvent)
       return fetchedEvent
     } catch (error) {
       if (axios.isAxiosError(error)) {

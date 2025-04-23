@@ -22,15 +22,11 @@
 
         <div class="event-guests">
           <div class="guest-avatars">
-            <q-avatar
-              v-for="guest in eventss.guests?.slice(0, 5) ?? []"
-              :key="guest.id"
-              size="32px"
-            >
-              <q-img :src="guest.avatar || 'default-avatar.jpg'" alt="guest avatar" />
+            <q-avatar v-for="guest in event.guests?.slice(0, 5)" :key="guest.id" size="32px">
+              <q-img :src="guest.avatar || '/assets/pic/luca.png'" alt="guest avatar" />
             </q-avatar>
-            <span class="additional-guests" v-if="(eventss.guests?.length ?? 0) > 5">
-              +{{ (eventss.guests?.length ?? 0) - 5 }}
+            <span v-if="event.guests.length > 5" class="additional-guests">
+              +{{ event.guests.length - 5 }}
             </span>
           </div>
           <q-btn
@@ -65,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { eventStores } from 'src/stores/eventstores'
 import InvitationsCompo from 'src/components/InvitationsCom.vue'
 import UpcomingEvent from 'src/components/UpcomingEvent.vue'
@@ -73,6 +69,26 @@ import { getReadSasToken } from 'src/utils/azureUploader'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const eventStore = eventStores()
+
+interface Guest {
+  id: string
+  name: string
+  avatar: string
+}
+
+interface EventWithGuests {
+  id: string
+  name: string
+  description: string
+  date: string
+  startTime: string
+  image: string
+  location: string
+  category: string
+  createdBy: string
+  guests: Guest[]
+}
 
 const goToEvent = async (id: string) => {
   try {
@@ -81,62 +97,85 @@ const goToEvent = async (id: string) => {
     console.error('Navigation error:', error)
   }
 }
+
 const sasToken = ref<string>('')
 
-const eventss = ref({
-  guests: [
-    { id: 1, avatar: 'avatar1.jpg' },
-    { id: 2, avatar: 'avatar2.jpg' },
-    { id: 3, avatar: 'avatar3.jpg' },
-    { id: 4, avatar: 'avatar4.jpg' },
-    { id: 5, avatar: 'avatar5.jpg' },
-    { id: 6, avatar: 'avatar6.jpg' },
-  ],
-})
-
-const eventStore = eventStores()
+const events = ref<EventWithGuests[]>([])
 
 const today = new Date()
 const dayAfterTomorrow = new Date()
 dayAfterTomorrow.setDate(today.getDate() + 2)
 
+const buildImageUrl = (url: string | undefined): string => {
+  if (!url) return '/assets/pic/luca.png'
+  return `${url}${sasToken.value}`
+}
+
 onMounted(async () => {
   try {
-    await eventStore.getEventsByuser()
     sasToken.value = await getReadSasToken()
-  } catch (error) {
-    console.error('Error fetching events:', error)
-  }
-})
+    await eventStore.getEventsByuser()
 
-const events = computed(() => {
-  return eventStore.userEvents
-    .filter((event) => {
+    const rawEvents = eventStore.userEvents
+
+    const upcomingEvents = rawEvents.filter((event) => {
       if (!event.eventDate) return false
-
       const eventDate = new Date(event.eventDate)
-      const eventTimestamp = eventDate.getTime()
-
-      return (
-        !isNaN(eventTimestamp) &&
-        eventTimestamp >= today.getTime() &&
-        eventTimestamp < dayAfterTomorrow.getTime()
-      )
+      return !isNaN(eventDate.getTime()) && eventDate >= today && eventDate < dayAfterTomorrow
     })
-    .map((event) => ({
-      id: event.eventId,
-      name: event.eventTitle,
-      description: event.eventDescription,
-      date: event.eventDate.split('T')[0],
-      startTime: event.eventDate?.split('T')[1]?.slice(0, 5) || '',
-      image:
-        typeof event.eventImage === 'string'
-          ? `${event.eventImage}?${sasToken.value}`
-          : 'default-event.jpg',
-      location: event.eventLocation,
-      category: event.eventCategory,
-      createdBy: event.createdBy,
-    }))
+
+    const withGuests: EventWithGuests[] = await Promise.all(
+      upcomingEvents.map(async (event): Promise<EventWithGuests> => {
+        try {
+          const guestIds = await eventStore.getGuestListByEventId(event.eventId)
+          const uniqueIds = [...new Set(guestIds.filter((id) => id?.trim() !== ''))]
+          const users = await Promise.all(uniqueIds.map((id) => eventStore.getUserInfoById(id)))
+          const guests: Guest[] = users.filter(Boolean).map((u) => ({
+            id: u!.userId,
+            name: u!.userName,
+            avatar: buildImageUrl(u!.profilePicture),
+          }))
+
+          return {
+            id: event.eventId,
+            name: event.eventTitle,
+            description: event.eventDescription,
+            date: event.eventDate?.split('T')[0] ?? '',
+            startTime: event.eventDate?.split('T')[1]?.slice(0, 5) ?? '',
+            image:
+              typeof event.eventImage === 'string'
+                ? `${event.eventImage}?${sasToken.value}`
+                : 'default-event.jpg',
+            location: event.eventLocation,
+            category: event.eventCategory,
+            createdBy: event.createdBy,
+            guests,
+          }
+        } catch (err) {
+          console.error(`Error loading guests for event ${event.eventId}:`, err)
+          return {
+            id: event.eventId,
+            name: event.eventTitle,
+            description: event.eventDescription,
+            date: event.eventDate?.split('T')[0] ?? '',
+            startTime: event.eventDate?.split('T')[1]?.slice(0, 5) ?? '',
+            image:
+              typeof event.eventImage === 'string'
+                ? `${event.eventImage}?${sasToken.value}`
+                : 'default-event.jpg',
+            location: event.eventLocation,
+            category: event.eventCategory,
+            createdBy: event.createdBy,
+            guests: [],
+          }
+        }
+      }),
+    )
+
+    events.value = withGuests
+  } catch (error) {
+    console.error('Error loading events with guests:', error)
+  }
 })
 </script>
 

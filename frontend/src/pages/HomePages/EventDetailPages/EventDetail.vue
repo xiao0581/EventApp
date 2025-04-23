@@ -456,7 +456,7 @@ const getCoordinates = async (address: string) => {
 }
 
 .event-info p {
-  color: #666;
+  color: black;
   margin-bottom: 16px;
 }
 .event-video {
@@ -472,6 +472,8 @@ const getCoordinates = async (address: string) => {
 
 .event-section h6 {
   margin-bottom: 10px;
+  margin-top: 0px;
+  margin-left: 12px;
   font-weight: bold;
 }
 
