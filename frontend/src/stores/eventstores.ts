@@ -5,7 +5,7 @@ import { uploadToAzureBlob } from 'src/utils/azureUploader'
 import axios from 'axios'
 const API_URL = import.meta.env.VITE_API_BASE_URL
 
-interface Event {
+export interface Event {
   eventId: string
   eventTitle: string
   eventDescription: string
@@ -249,6 +249,62 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  const generateInviteLink = async (eventId: string): Promise<string | null> => {
+    try {
+      const res = await axios.post<{ inviteCode: string }>(
+        `${API_URL}Invitation/event/${eventId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+      return res.data.inviteCode
+    } catch (error) {
+      console.error('Error generating invite link:', error)
+      return null
+    }
+  }
+
+  const acceptInvite = async (inviteCode: string) => {
+    try {
+      const res = await axios.post(
+        `${API_URL}Invitation/accept/${inviteCode}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      return res.data
+    } catch (err) {
+      console.error('Accept failed:', err)
+      return null
+    }
+  }
+
+  const declineInvite = async (inviteCode: string) => {
+    try {
+      const res = await axios.post(
+        `${API_URL}Invitation/decline/${inviteCode}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      return res.data
+    } catch (err) {
+      console.error('Decline failed:', err)
+      return null
+    }
+  }
+
   return {
     event,
     creation,
@@ -258,5 +314,8 @@ export const eventStores = defineStore('eventstore', () => {
     updateEvent,
     getGuestListByEventId,
     getUserInfoById,
+    generateInviteLink,
+    acceptInvite,
+    declineInvite,
   }
 })

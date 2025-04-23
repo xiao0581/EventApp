@@ -22,7 +22,7 @@ namespace EversayApi.Controllers
         {
             _invitations = mongoDbService.Database.GetCollection<Invitation>("invitations");
             _events = mongoDbService.Database.GetCollection<Event>("event");
-            _guestList = mongoDbService.Database.GetCollection<GuestList>("guestlist");
+            _guestList = mongoDbService.Database.GetCollection<GuestList>("guestlists");
         }
 
         [HttpPost("event/{eventId}")]
@@ -38,7 +38,9 @@ namespace EversayApi.Controllers
 
             await _invitations.InsertOneAsync(invitation);
 
-            var link = $"https://eversay.com/invite/%7BinviteCode%7D";
+            var request = HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+            var link = $"{baseUrl}/invite/{inviteCode}";
             return Ok(new { inviteLink = link });
         }
         [HttpPost("accept/{inviteCode}")]
@@ -77,6 +79,52 @@ namespace EversayApi.Controllers
                 await _invitations.UpdateOneAsync(i => i.InviteCode == inviteCode, update);
             }
 
+            var ev = await _events.Find(e => e.eventId == invitation.EventId).FirstOrDefaultAsync();
+            return Ok(ev);
+        }
+
+
+        [HttpPost("decline/{inviteCode}")]
+        public async Task<IActionResult> DeclineInvite(string inviteCode)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var invitation = await _invitations.Find(i => i.InviteCode == inviteCode).FirstOrDefaultAsync();
+            if (invitation == null)
+            {
+                return NotFound("Invitation not found");
+            }
+
+            
+            var existing = await _guestList.Find(x => x.EventId == invitation.EventId && x.UserId == userId).FirstOrDefaultAsync();
+
+            if (existing != null)
+            {
+                var update = Builders<GuestList>.Update
+                    .Set(x => x.IsAttending, false);
+                await _guestList.UpdateOneAsync(x => x.EventId == invitation.EventId && x.UserId == userId, update);
+            }
+            else
+            {
+                
+                var guestList = new GuestList
+                {
+                    EventId = invitation.EventId,
+                    UserId = userId,
+                    IsAttending = false,
+                    GuestListName = "InviteJoin",
+                    Attendees = 1,
+                    GuestListImage = "",
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _guestList.InsertOneAsync(guestList);
+            }
+
+            
+            var invitationUpdate = Builders<Invitation>.Update
+                .Set(x => x.DeclinedUserId, userId)
+                .Set(x => x.DeclinedAt, DateTime.UtcNow);
+            await _invitations.UpdateOneAsync(i => i.InviteCode == inviteCode, invitationUpdate);
             var ev = await _events.Find(e => e.eventId == invitation.EventId).FirstOrDefaultAsync();
             return Ok(ev);
         }

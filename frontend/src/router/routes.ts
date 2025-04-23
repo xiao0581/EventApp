@@ -73,6 +73,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('src/pages/HomePages/EventDetailPages/OurGuests.vue'),
         meta: { hideFooter: true, requiresAuth: true },
       },
+
+      {
+        path: '/invite/:inviteCode',
+        name: 'InviteHandler',
+        component: () => import('src/pages/HomePages/InvitePages/InviteHandler.vue'),
+      },
     ],
   },
 ]

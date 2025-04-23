@@ -172,7 +172,18 @@
     </div>
 
     <div class="event-section">
-      <h6 class="q-mb-sm">Our Guests</h6>
+      <div class="row items-center justify-between q-pr-sm">
+        <h6 class="q-mb-sm">Our guests</h6>
+        <q-btn
+          v-if="canEditEvent"
+          dense
+          color="primary"
+          icon="link"
+          label="invite guests"
+          @click="onGenerateInvite"
+        />
+      </div>
+
       <GuestListcompo :event-id="eventId" :grouped="false" />
       <q-btn
         flat
@@ -181,6 +192,25 @@
         :to="`/event/${event?.eventId}/guests`"
         style="text-transform: none"
       />
+
+      <q-dialog v-model="showInviteDialog">
+        <q-card style="min-width: 350px; max-width: 500px">
+          <q-card-section>
+            <div class="text-h6">InviteLink</div>
+            <q-input v-model="inviteLink" readonly filled />
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn
+              flat
+              label="Copy link"
+              color="primary"
+              icon="content_copy"
+              @click="copyInviteLink"
+            />
+            <q-btn flat label="close" color="negative" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
     </div>
 
     <router-view />
@@ -197,6 +227,9 @@ import { uploadToAzureBlob } from 'src/utils/azureUploader'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import GuestListcompo from 'src/components/GuestListcompo.vue'
+
+const showInviteDialog = ref(false)
+const inviteLink = ref('')
 
 const route = useRoute()
 const userEvent = eventStores()
@@ -236,6 +269,23 @@ watch(event, (newEvent) => {
     editedEvent.value = { ...newEvent, eventDate: formattedDate }
   }
 })
+
+//generate invite link
+const onGenerateInvite = async () => {
+  if (!event.value?.eventId) return
+
+  const code = await userEvent.generateInviteLink(event.value.eventId)
+  if (code) {
+    inviteLink.value = `${window.location.origin}/#/invite/${code}`
+    showInviteDialog.value = true
+  }
+}
+
+const copyInviteLink = async () => {
+  if (!inviteLink.value) return
+  await navigator.clipboard.writeText(inviteLink.value)
+  alert('copied to clipboard')
+}
 
 // clickable image input
 const imageInputRef = ref<HTMLInputElement | null>(null)
@@ -456,7 +506,7 @@ const getCoordinates = async (address: string) => {
 }
 
 .event-info p {
-  color: black;
+  color: #4a4e69;
   margin-bottom: 16px;
 }
 .event-video {
