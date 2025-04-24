@@ -49,19 +49,24 @@ const sasToken = ref<string>('')
 
 const eventImageUrl = computed(() => {
   if (!eventInfo.value?.eventImage) return '/assets/pic/luca.png'
-  return `${eventInfo.value.eventImage}${sasToken.value}`
+
+  if (typeof eventInfo.value.eventImage === 'string') {
+    return `${eventInfo.value.eventImage}${sasToken.value}`
+  }
+
+  return '/assets/pic/luca.png' // fallback for File/null
 })
 
 onMounted(async () => {
   if (!authStore.user) {
-    router.replace({ path: '/MainLoginView', query: { redirect: route.fullPath } })
+    await router.replace({ path: '/MainLoginView', query: { redirect: route.fullPath } })
     return
   }
 
   try {
     const data = await eventStore.acceptInvite(inviteCode)
     if (!data) {
-      router.push('/home')
+      await router.push('/home')
       return
     }
     eventInfo.value = data.event
@@ -69,7 +74,7 @@ onMounted(async () => {
     showDialog.value = true
   } catch (err) {
     console.error('Invite accept error:', err)
-    router.push('/home')
+    await router.push('/home')
   } finally {
     loading.value = false
   }
@@ -83,13 +88,13 @@ const handleAccept = async () => {
     eventStore.userEvents.push(e)
   }
 
-  router.replace({ path: '/home', query: { invited: 'accepted' } })
+  await router.replace({ path: '/home', query: { invited: 'accepted' } })
 }
 
 const handleDecline = async () => {
   await eventStore.declineInvite(inviteCode)
   showDialog.value = false
-  router.replace({ path: '/home', query: { invited: 'declined' } })
+  await router.replace({ path: '/home', query: { invited: 'declined' } })
 }
 
 const formattedDate = computed(() =>

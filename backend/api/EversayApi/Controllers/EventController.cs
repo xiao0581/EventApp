@@ -98,18 +98,22 @@ namespace EversayApi.Controllers
             return await _events.Find(filter).ToListAsync();
         }
 
-
         [HttpGet("byguest/{userId}")]
         public async Task<ActionResult<IEnumerable<Event>>> GetEventsByGuestUserId(string userId)
         {
             try
             {
-                var guestListFilter = Builders<GuestList>.Filter.Eq("user_id", userId);
+               
+                var guestListFilter = Builders<GuestList>.Filter.And(
+                    Builders<GuestList>.Filter.Eq("user_id", userId),
+                    Builders<GuestList>.Filter.Eq("is_attending", true)
+                );
+
                 var guestEntries = await _guestList.Find(guestListFilter).ToListAsync();
 
                 if (guestEntries == null || guestEntries.Count == 0)
                 {
-                    return NotFound(new { message = "No events found for this user." });
+                    return NotFound(new { message = "No attending events found for this user." });
                 }
 
                 var eventIds = new List<ObjectId>();
@@ -136,7 +140,7 @@ namespace EversayApi.Controllers
                 return Ok(events);
             }
             catch (MongoException ex)
-            {             
+            {
                 Console.WriteLine($"MongoDB error: {ex.Message}");
                 return StatusCode(500, new { message = "Database error occurred. Please try again later." });
             }

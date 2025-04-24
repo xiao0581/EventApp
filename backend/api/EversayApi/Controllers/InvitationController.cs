@@ -38,10 +38,7 @@ namespace EversayApi.Controllers
 
             await _invitations.InsertOneAsync(invitation);
 
-            var request = HttpContext.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}";
-            var link = $"{baseUrl}/invite/{inviteCode}";
-            return Ok(new { inviteLink = link });
+            return Ok(new { inviteCode }); 
         }
         [HttpPost("accept/{inviteCode}")]
         public async Task<IActionResult> AcceptInvite(string inviteCode)
@@ -80,7 +77,14 @@ namespace EversayApi.Controllers
             }
 
             var ev = await _events.Find(e => e.eventId == invitation.EventId).FirstOrDefaultAsync();
-            return Ok(ev);
+
+            var guestUsers = await _guestList.Find(g => g.EventId == invitation.EventId).ToListAsync();
+
+            return Ok(new
+            {
+                Event = ev,
+                Guests = guestUsers
+            });
         }
 
 
@@ -126,7 +130,14 @@ namespace EversayApi.Controllers
                 .Set(x => x.DeclinedAt, DateTime.UtcNow);
             await _invitations.UpdateOneAsync(i => i.InviteCode == inviteCode, invitationUpdate);
             var ev = await _events.Find(e => e.eventId == invitation.EventId).FirstOrDefaultAsync();
-            return Ok(ev);
+
+            var guestUsers = await _guestList.Find(g => g.EventId == invitation.EventId).ToListAsync();
+
+            return Ok(new
+            {
+                Event = ev,
+                Guests = guestUsers
+            });
         }
     }
 }
