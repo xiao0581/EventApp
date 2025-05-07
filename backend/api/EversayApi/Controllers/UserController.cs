@@ -57,7 +57,7 @@ namespace EversayApi.Controllers
             }
             else
             {
-                createdUser.ProfilePicture = "";
+                createdUser.ProfilePicture = "https://eversaydevne.blob.core.windows.net/eversaydev/unicorn_avatar.png";
             }
 
             return Ok(createdUser);

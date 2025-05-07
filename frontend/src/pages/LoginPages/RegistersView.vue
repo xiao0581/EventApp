@@ -29,6 +29,19 @@
           </q-input>
 
           <q-input
+            v-model="form.Name"
+            label="Name"
+            type="text"
+            label-color="accent"
+            style="width: 100%; max-width: 350px"
+            :rules="[(val) => !!val || 'Name is required']"
+          >
+            <template v-slot:prepend>
+              <q-icon name="email" />
+            </template>
+          </q-input>
+
+          <q-input
             v-model="form.password"
             label="Password"
             type="password"
@@ -64,7 +77,7 @@
             :disable="loading"
           />
           <div class="signup-container">
-            <span>Joined us before?</span>
+            <span>Joined us before? </span>
             <router-link to="/login" class="signup-link">Log in</router-link>
           </div>
         </q-form>
@@ -81,6 +94,7 @@ import { Notify } from 'quasar'
 const form = reactive({
   password: '',
   email: '',
+  Name: '',
   confirmPassword: '',
 })
 
@@ -93,6 +107,7 @@ const handleRegister = async (): Promise<void> => {
   try {
     await authStore.register({
       password: form.password,
+      Name: form.Name,
       email: form.email,
       confirmPassword: form.confirmPassword,
     })
@@ -215,5 +230,9 @@ const handleRegister = async (): Promise<void> => {
   background: #5b3b8b;
   color: white;
   background: linear-gradient(to right, #6c3baa, #9183f1);
+}
+
+.signup-container span {
+  margin-right: 10px;
 }
 </style>

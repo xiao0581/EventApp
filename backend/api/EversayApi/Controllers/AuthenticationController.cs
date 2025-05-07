@@ -93,7 +93,7 @@ namespace EversayApi.Controllers
                     UserName = request.Name,
                     Email = request.Email,
                     UserRole = UserType.Guest,
-                    ProfilePicture = "",
+                    ProfilePicture = "https://eversaydevne.blob.core.windows.net/eversaydev/unicorn_avatar.png",
                     PasswordHash = ""
                 };
 

@@ -56,31 +56,6 @@
           />
         </q-form>
       </q-card-section>
-
-      <q-card-section class="separator">
-        <q-separator class="line" />
-        <span class="or-text">or</span>
-        <q-separator class="line" />
-      </q-card-section>
-
-      <q-card-section>
-        <div class="button-group">
-          <q-btn unelevated class="login-option google-btn">
-            <q-icon name="img:/src/assets/pic/google.png" size="20px" />
-            <span>Continue with Google</span>
-          </q-btn>
-
-          <q-btn unelevated class="login-option apple-btn">
-            <q-icon name="img:/src/assets/pic/apple.png" size="20px" />
-            <span>Continue with Apple</span>
-          </q-btn>
-
-          <q-btn unelevated class="login-option email-btn" to="/login">
-            <q-icon name="mail" size="20px" />
-            <span>Continue with Email</span>
-          </q-btn>
-        </div>
-      </q-card-section>
     </q-card>
   </q-page>
 </template>
@@ -231,7 +206,7 @@ const handleLogin = async (): Promise<void> => {
   align-items: center;
   width: 100%;
   max-width: 350px;
-  margin-top: -20px;
+  margin-top: 20px;
 }
 
 .separator {
@@ -271,22 +246,6 @@ const handleLogin = async (): Promise<void> => {
   margin-top: -40px;
 }
 
-.google-btn {
-  background: #d9d9d9;
-  border: 1px solid #ccc;
-  font-weight: bold;
-  color: black;
-  border-radius: 50px;
-}
-
-.apple-btn {
-  background: #d9d9d9;
-  border: 1px solid #ccc;
-  font-weight: bold;
-  color: black;
-  border-radius: 50px;
-}
-
 .email-btn {
   background: #d9d9d9;
   border: 1px solid #ccc;
@@ -296,6 +255,7 @@ const handleLogin = async (): Promise<void> => {
 }
 
 .login-btn {
+  margin-top: 30px;
   background: #5b3b8b;
   color: white;
   background: linear-gradient(to right, #6c3baa, #9183f1);

@@ -27,7 +27,7 @@ namespace EversayApi.Services
             user.UserName = registerRequest.Name;
             user.Email = registerRequest.Email;
             user.UserRole = UserType.Guest;
-            user.ProfilePicture = "";
+            user.ProfilePicture = "https://eversaydevne.blob.core.windows.net/eversaydev/unicorn_avatar.png";
             user.PasswordHash = _passwordHasher.HashPassword(user, registerRequest.Password);
 
             await _users.InsertOneAsync(user);

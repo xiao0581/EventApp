@@ -49,10 +49,10 @@
     </div>
   </div>
 
-  <div class="invitations-section">
+  <!--   <div class="invitations-section">
     <h2>My Invitations</h2>
     <InvitationsCompo />
-  </div>
+  </div> -->
 
   <div class="upcoming-events-section">
     <h2>Upcoming Events</h2>
@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { eventStores } from 'src/stores/eventstores'
-import InvitationsCompo from 'src/components/InvitationsCom.vue'
+/* import InvitationsCompo from 'src/components/InvitationsCom.vue' */
 import UpcomingEvent from 'src/components/UpcomingEvent.vue'
 import { getReadSasToken } from 'src/utils/azureUploader'
 import { useRouter } from 'vue-router'

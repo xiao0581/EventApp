@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useEventStore } from 'src/stores/11'
+import { useEventStore } from 'src/stores/Mock'
 
 const eventStore = useEventStore()
 

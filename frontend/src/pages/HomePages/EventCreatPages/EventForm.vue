@@ -87,15 +87,35 @@
           filled
           class="q-mt-md"
         />
+        <div class="input-label">start time</div>
+        <q-input filled v-model="eventData.startTime">
+          <template v-slot:append>
+            <q-icon name="access_time" class="cursor-pointer" color="primary">
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-time v-model="eventData.startTime" mask="HH:mm" format24h>
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup label="Close" color="primary" flat />
+                  </div>
+                </q-time>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input>
 
-        <div class="input-label">Duration</div>
-        <q-input
-          type="number"
-          v-model="eventData.duration"
-          label="please enter hours"
-          filled
-          class="q-mt-md"
-        />
+        <div class="input-label">End time</div>
+        <q-input filled v-model="eventData.endTime">
+          <template v-slot:append>
+            <q-icon name="access_time" class="cursor-pointer" color="primary">
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-time v-model="eventData.endTime" mask=" HH:mm" format24h>
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup label="Close" color="primary" flat />
+                  </div>
+                </q-time>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input>
 
         <div class="input-label">Location</div>
         <q-input
@@ -154,6 +174,8 @@ const eventData = reactive({
   eventPreview: null as File | null,
   eventDate: '',
   eventTitle: '',
+  startTime: '',
+  endTime: '',
   duration: '',
   eventLocation: '',
   eventname: '',
@@ -177,15 +199,30 @@ const updatePosterPreview = (file: File | null) => {
     posterPreviewUrl.value = ''
   }
 }
+const calculateDuration = (): number => {
+  const [startHour = 0, startMinute = 0] = eventData.startTime.split(':').map(Number)
+  const [endHour = 0, endMinute = 0] = eventData.endTime.split(':').map(Number)
 
+  const startTotalMinutes = startHour * 60 + startMinute
+  const endTotalMinutes = endHour * 60 + endMinute
+
+  let durationMinutes = endTotalMinutes - startTotalMinutes
+
+  if (durationMinutes < 0) {
+    durationMinutes += 24 * 60
+  }
+
+  return durationMinutes / 60
+}
 const eventcreate = async (): Promise<void> => {
   loading.value = true
   try {
+    const calulated = calculateDuration()
     const createdEvent = await useEventStore.creation({
       eventTitle: eventData.eventTitle,
       eventDescription: eventData.eventDescription,
       eventDate: eventData.eventDate,
-      duration: eventData.duration,
+      duration: calulated.toString(),
       createdAt: eventData.createdAt,
       expiredAt: eventData.eventDate,
       eventLocation: eventData.eventLocation,

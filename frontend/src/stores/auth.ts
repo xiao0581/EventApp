@@ -2,15 +2,17 @@ import { defineStore } from 'pinia'
 const API_URL = import.meta.env.VITE_API_BASE_URL
 import { ref, computed } from 'vue'
 import { jwtDecode } from 'jwt-decode'
+import { eventStores } from './eventstores'
 interface User {
   userId: string
+  Name?: string
   email: string
   token: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-
+  const eventStore = eventStores()
   function isTokenExpired(token: string): boolean {
     try {
       const decoded: { exp: number } = jwtDecode(token)
@@ -35,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const login = async (credentials: { email: string; password: string }) => {
     try {
+      logout()
       const response = await fetch(`${API_URL}v1/authenticate/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,6 +58,8 @@ export const useAuthStore = defineStore('auth', () => {
         token: data.accessToken,
       }
       localStorage.setItem('user', JSON.stringify(user.value))
+
+      await eventStore.getEventsByuser()
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Failed to login')
     }
@@ -63,6 +68,7 @@ export const useAuthStore = defineStore('auth', () => {
   const register = async (credentials: {
     password: string
     confirmPassword: string
+    Name: string
     email: string
   }) => {
     try {
@@ -96,6 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = () => {
     user.value = null
     localStorage.removeItem('user')
+    eventStore.clearEvents()
   }
 
   const isAuthenticated = computed(() => !!user.value)

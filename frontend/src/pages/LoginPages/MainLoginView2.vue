@@ -5,7 +5,7 @@
       <q-img src="src/assets/pic/logo1.png" class="logo"></q-img>
       <q-img src="src/assets/pic/EverSay.png" class="eversay"></q-img>
       <div class="title">
-        <h7>Connecting people. One celebration at a time</h7>
+        <h6>Connecting people. One celebration at a time</h6>
       </div>
 
       <div class="button-group">
@@ -68,7 +68,7 @@
   width: 100%;
 }
 
-.title h7 {
+.title h6 {
   font-weight: bold;
   margin-bottom: 50px;
   color: white;

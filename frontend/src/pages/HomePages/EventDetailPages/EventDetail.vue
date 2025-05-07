@@ -64,107 +64,108 @@
           filled
           class="q-mt-md edit-field"
         />
+
         <q-btn
-          v-if="(event?.eventDescription || '').length > 100"
+          v-if="(event?.eventDescription || '').length > 100 && !isEditing"
           flat
-          label="Show more"
-          v-show="!isDescriptionExpanded"
-          @click="toggleDescription"
           class="show-more-btn"
-          style="text-transform: none"
-        />
-        <q-btn
-          v-if="(event?.eventDescription || '').length > 100"
-          flat
-          label="Show less"
-          v-show="isDescriptionExpanded"
+          :label="isDescriptionExpanded ? 'Show less' : 'Show more'"
           @click="toggleDescription"
-          class="show-less-btn"
-          style="text-transform: none"
+          style="text-transform: none; margin-bottom: 8px"
         />
 
-        <div class="event-details-time">
-          <p v-if="!isEditing" class="event-date">
-            <q-icon name="date_range" /> {{ formatDate(event?.eventDate) }}
-          </p>
-          <q-input v-else filled v-model="editedEvent.eventDate" class="edit-field">
-            <template v-slot:prepend>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="editedEvent.eventDate" mask="YYYY-MM-DD HH:mm">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
+        <q-btn
+          v-else-if="eventStarted && !isEditing"
+          flat
+          class="show-less-btn"
+          :label="isDetailsCollapsed ? 'Show details' : 'Hide details'"
+          @click="toggleDetailsManually"
+          style="text-transform: none; margin-bottom: 8px"
+        />
+        <div class="event-details-time" v-show="!isDetailsCollapsed || !eventStarted">
+          <div class="event-details-time">
+            <p v-if="!isEditing" class="event-date">
+              <q-icon name="date_range" /> {{ formatDate(event?.eventDate) }}
+            </p>
+            <q-input v-else filled v-model="editedEvent.eventDate" class="edit-field">
+              <template v-slot:prepend>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-date v-model="editedEvent.eventDate" mask="YYYY-MM-DD HH:mm">
+                      <div class="row items-center justify-end">
+                        <q-btn v-close-popup label="Close" color="primary" flat />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
 
-            <template v-slot:append>
-              <q-icon name="access_time" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-time v-model="editedEvent.eventDate" mask="YYYY-MM-DD HH:mm" format24h>
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-time>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
+              <template v-slot:append>
+                <q-icon name="access_time" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-time v-model="editedEvent.eventDate" mask="YYYY-MM-DD HH:mm" format24h>
+                      <div class="row items-center justify-end">
+                        <q-btn v-close-popup label="Close" color="primary" flat />
+                      </div>
+                    </q-time>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
 
-          <p v-if="!isEditing" class="event-time">
-            <q-icon name="schedule" /> {{ formatTime(event?.eventDate) }} -
-            {{ formatEndTime(event?.eventDate, event?.duration) }}
-          </p>
+            <p v-if="!isEditing" class="event-time">
+              <q-icon name="schedule" /> {{ formatTime(event?.eventDate) }} -
+              {{ formatEndTime(event?.eventDate, event?.duration) }}
+            </p>
 
-          <q-input
-            v-else
-            type="number"
-            v-model="editedEvent.duration"
-            label="please enter new hours"
-            filled
-            class="q-mt-md edit-field"
-          />
-
-          <p v-if="!isEditing" class="event-location">
-            <q-icon name="place" /> {{ event?.eventLocation }}
-          </p>
-          <q-input
-            v-else
-            v-model="editedEvent.eventLocation"
-            label="please enter new location"
-            filled
-            class="q-mt-md edit-field"
-          />
-          <div id="map" class="map-container"></div>
-          <p v-if="event && !event.eventLocation" class="text-center text-grey">
-            📍 No location provided for this event.
-          </p>
-        </div>
-        <div class="event-preview-video">
-          <p class="event-preview">Catch the celebration vibe with a quick preview</p>
-          <q-video
-            v-if="sasToken && !isEditing"
-            :src="getEventvideo(event?.eventPreview)"
-            class="event-video"
-          ></q-video>
-
-          <div v-else class="q-mt-md">
-            <input
-              type="file"
-              accept="video/*"
-              ref="videoInputRef"
-              class="hidden-file-input"
-              @change="onVideoSelected"
+            <q-input
+              v-else
+              type="number"
+              v-model="editedEvent.duration"
+              label="please enter new hours"
+              filled
+              class="q-mt-md edit-field"
             />
-            <div class="video-wrapper q-mt-sm" @click="triggerVideoInput">
-              <q-video
-                v-if="editedEvent.eventPreview"
-                :src="getEventvideo(editedEvent.eventPreview)"
-                class="event-video"
+
+            <p v-if="!isEditing" class="event-location">
+              <q-icon name="place" /> {{ event?.eventLocation }}
+            </p>
+            <q-input
+              v-else
+              v-model="editedEvent.eventLocation"
+              label="please enter new location"
+              filled
+              class="q-mt-md edit-field"
+            />
+            <div id="map" class="map-container"></div>
+            <p v-if="event && !event.eventLocation" class="text-center text-grey">
+              📍 No location provided for this event.
+            </p>
+          </div>
+          <div class="event-preview-video">
+            <p class="event-preview">Catch the celebration vibe with a quick preview</p>
+            <q-video
+              v-if="sasToken && !isEditing"
+              :src="getEventvideo(event?.eventPreview)"
+              class="event-video"
+            ></q-video>
+
+            <div v-else class="q-mt-md">
+              <input
+                type="file"
+                accept="video/*"
+                ref="videoInputRef"
+                class="hidden-file-input"
+                @change="onVideoSelected"
               />
-              <div class="video-overlay" />
+              <div class="video-wrapper q-mt-sm" @click="triggerVideoInput">
+                <q-video
+                  v-if="editedEvent.eventPreview"
+                  :src="getEventvideo(editedEvent.eventPreview)"
+                  class="event-video"
+                />
+                <div class="video-overlay" />
+              </div>
             </div>
           </div>
         </div>
@@ -172,31 +173,113 @@
     </div>
 
     <div class="event-section">
-      <div class="row items-center justify-between q-pr-sm">
-        <h6 class="q-mb-sm">Our guests</h6>
-        <q-btn
-          v-if="canEditEvent"
+      <template v-if="eventStarted">
+        <q-tabs
+          v-model="activeTab"
           dense
-          color="primary"
-          icon="link"
-          label="invite guests"
-          @click="onGenerateInvite"
-        />
-      </div>
+          class="text-black"
+          active-color="black"
+          indicator-color="primary"
+        >
+          <q-tab name="memories" label="Memories" />
+          <q-tab name="guests" label="Our guests" />
+        </q-tabs>
 
-      <GuestListcompo :event-id="eventId" :grouped="false" />
-      <q-btn
-        flat
-        label="View all guests"
-        class="View-more-btn"
-        :to="`/event/${event?.eventId}/guests`"
-        style="text-transform: none"
-      />
+        <q-tab-panels v-model="activeTab" animated class="text-dark text-center">
+          <q-tab-panel name="guests" class="guests-panel">
+            <div class="row justify-end q-mt-sm">
+              <q-btn
+                v-if="canEditEvent"
+                dense
+                color="primary"
+                icon="link"
+                label="invite guests"
+                @click="onGenerateInvite"
+              />
+            </div>
+            <GuestListcompo :event-id="eventId" :grouped="false" />
+            <q-btn
+              flat
+              label="View all guests"
+              class="View-more-btn"
+              :to="`/event/${event?.eventId}/guests`"
+              style="text-transform: none"
+            />
+          </q-tab-panel>
+
+          <q-tab-panel name="memories" class="memories-panel">
+            <q-btn fab color="primary" icon="add" class="upload-fab" @click="triggerUpload" />
+
+            <div class="masonry">
+              <div class="masonry-item" v-for="item in memoryList" :key="item.id">
+                <q-img
+                  :src="item.url"
+                  class="rounded-borders"
+                  style="width: 100%; border-radius: 12px"
+                >
+                  <div
+                    class="absolute-bottom text-white photo-description"
+                    style="background-color: transparent"
+                  >
+                    <div
+                      style="
+                        position: absolute;
+                        left: 8px;
+                        bottom: 8px;
+                        display: flex;
+                        align-items: center;
+                      "
+                    >
+                      {{ item.description }}
+                    </div>
+
+                    <div
+                      style="
+                        position: absolute;
+                        right: 8px;
+                        bottom: 8px;
+                        display: flex;
+                        align-items: center;
+                      "
+                    >
+                      <q-icon name="favorite" color="white" size="16px" />
+                      <span class="q-ml-xs">{{ item.likes }}</span>
+                    </div>
+                  </div>
+                </q-img>
+              </div>
+            </div>
+          </q-tab-panel>
+        </q-tab-panels>
+      </template>
+
+      <template v-else>
+        <div class="row items-center justify-between q-pr-sm">
+          <h6 class="q-mb-sm">Our guests</h6>
+
+          <q-btn
+            v-if="canEditEvent"
+            dense
+            color="primary"
+            icon="link"
+            label="invite guests"
+            @click="onGenerateInvite"
+          />
+        </div>
+        <GuestListcompo :event-id="eventId" :grouped="false" />
+        <q-btn
+          flat
+          label="View all guests"
+          class="View-more-btn"
+          :to="`/event/${event?.eventId}/guests`"
+          style="text-transform: none"
+        />
+      </template>
 
       <q-dialog v-model="showInviteDialog">
         <q-card style="min-width: 350px; max-width: 500px">
           <q-card-section>
-            <div class="text-h6">InviteLink</div>
+            <div class="text-h6">Invite Link</div>
             <q-input v-model="inviteLink" readonly filled />
           </q-card-section>
           <q-card-actions align="right">
@@ -207,7 +290,30 @@
               icon="content_copy"
               @click="copyInviteLink"
             />
-            <q-btn flat label="close" color="negative" v-close-popup />
+            <q-btn flat label="Close" color="negative" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <q-dialog v-model="showUploadDialog">
+        <q-card style="min-width: 300px; max-width: 500px">
+          <q-card-section>
+            <div class="text-h6">Upload a Memory</div>
+
+            <input type="file" accept="image/*,video/*" @change="onFileSelected" class="q-mt-sm" />
+
+            <q-input
+              v-model="newDescription"
+              label="Description"
+              type="textarea"
+              filled
+              class="q-mt-md"
+            />
+          </q-card-section>
+
+          <q-card-actions align="right" class="justify-between">
+            <q-btn flat label="Cancel" color="primary" v-close-popup />
+            <q-btn flat label="Upload" color="primary" @click="uploadMemory" />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -244,6 +350,64 @@ const sasToken = ref('')
 const isDescriptionExpanded = ref(false)
 const selectedImageFile = ref<File | null>(null)
 const selectedVideoFile = ref<File | null>(null)
+const activeTab = ref('memories')
+const isDetailsCollapsed = ref(true)
+let map: L.Map | null = null
+const showUploadDialog = ref(false)
+const newDescription = ref('')
+const selectedUploadFile = ref<File | null>(null)
+const MAX_FILE_SIZE_MB = 10
+const triggerUpload = () => {
+  showUploadDialog.value = true
+}
+
+const onFileSelected = (e: Event) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+
+  const sizeInMB = file.size / (1024 * 1024)
+  if (sizeInMB > MAX_FILE_SIZE_MB) {
+    alert(`File too large. Max size is ${MAX_FILE_SIZE_MB}MB.`)
+    return
+  }
+
+  selectedUploadFile.value = file
+}
+
+const uploadMemory = async () => {
+  if (!selectedUploadFile.value) {
+    alert('Please select an image.')
+    return
+  }
+
+  const imageUrl = await uploadToAzureBlob(selectedUploadFile.value)
+
+  memoryList.value.unshift({
+    id: Date.now(),
+    url: imageUrl,
+    description: newDescription.value,
+    likes: 0,
+  })
+
+  selectedUploadFile.value = null
+  newDescription.value = ''
+  showUploadDialog.value = false
+}
+
+const memoryList = ref([
+  { id: 1, url: 'https://picsum.photos/300/200', description: '', likes: 15 },
+  { id: 2, url: 'https://picsum.photos/300/350', description: 'this is notStrictEqual', likes: 55 },
+  { id: 3, url: 'https://picsum.photos/300/250', description: ' notStrictEqual', likes: 3 },
+  { id: 4, url: 'https://picsum.photos/300/300', description: 'this is notStrictEqual', likes: 20 },
+  { id: 1, url: 'https://picsum.photos/300/600', description: ' notStrictEqual', likes: 13 },
+  { id: 1, url: 'https://picsum.photos/300/200', description: 'notStrictEqual', likes: 5 },
+  { id: 1, url: 'https://picsum.photos/300/500', description: 'this is notStrictEqual', likes: 12 },
+])
+
+const eventStarted = computed(() => {
+  if (!event.value?.eventDate) return false
+  return new Date() >= new Date(event.value.eventDate)
+})
 
 onMounted(async () => {
   await userEvent.fetchEventById(eventId.value)
@@ -270,6 +434,17 @@ watch(event, (newEvent) => {
   }
 })
 
+watch(isDetailsCollapsed, (newVal) => {
+  if (!newVal) {
+    // 展开详情后，地图可能显示不正常，需要重新计算大小
+    setTimeout(() => {
+      if (map) {
+        map.invalidateSize()
+      }
+    }, 300)
+  }
+})
+
 //generate invite link
 const onGenerateInvite = async () => {
   if (!event.value?.eventId) return
@@ -279,6 +454,9 @@ const onGenerateInvite = async () => {
     inviteLink.value = `${window.location.origin}/#/invite/${code}`
     showInviteDialog.value = true
   }
+}
+const toggleDetailsManually = () => {
+  isDetailsCollapsed.value = !isDetailsCollapsed.value
 }
 
 const copyInviteLink = async () => {
@@ -346,7 +524,10 @@ const updateEvent = async () => {
 
 //leaflet map
 const loadMap = (latitude: number, longitude: number) => {
-  const map = L.map('map').setView([latitude, longitude], 13)
+  if (map) {
+    map.remove()
+  }
+  map = L.map('map').setView([latitude, longitude], 13)
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '',
@@ -410,6 +591,12 @@ const getEventvideo = (video: string | File | null | undefined): string => {
 
 const toggleDescription = () => {
   isDescriptionExpanded.value = !isDescriptionExpanded.value
+
+  if (isDescriptionExpanded.value) {
+    isDetailsCollapsed.value = false
+  } else {
+    isDetailsCollapsed.value = true
+  }
 }
 
 //OpenStreetMap Nominatim API
@@ -619,5 +806,39 @@ const getCoordinates = async (address: string) => {
   color: #999;
   font-style: italic;
   margin-top: 10px;
+}
+
+.memories-panel {
+  background-color: #f3f3f5;
+}
+
+.guests-panel {
+  background-color: #f3f3f5;
+}
+
+.q-tab {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.q-tabs__content {
+  width: 100%;
+}
+
+.masonry {
+  column-count: 2;
+  column-gap: 12px;
+}
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 12px;
+}
+
+.upload-fab {
+  position: fixed;
+  bottom: 10px;
+  right: 20px;
+  z-index: 999;
 }
 </style>

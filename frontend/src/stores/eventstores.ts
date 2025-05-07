@@ -29,9 +29,7 @@ interface PublicUser {
 }
 export const eventStores = defineStore('eventstore', () => {
   const event = ref<Event | null>(null)
-  const authStore = useAuthStore()
-  const token = authStore.user?.token
-  const userId = authStore.user?.userId
+
   const userEvents = ref<Event[]>([])
 
   const creation = async (createEvents: {
@@ -47,6 +45,9 @@ export const eventStores = defineStore('eventstore', () => {
     eventCategory: string
   }) => {
     try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
       let posterUrl = ''
       let previewUrl = ''
 
@@ -97,6 +98,9 @@ export const eventStores = defineStore('eventstore', () => {
   }
 
   const getEventsByuser = async () => {
+    const authStore = useAuthStore()
+    const token = authStore.user?.token
+    const userId = authStore.user?.userId
     if (!userId) {
       console.error('User ID not found')
       return
@@ -127,6 +131,9 @@ export const eventStores = defineStore('eventstore', () => {
     }
 
     try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
       const response = await axios.get<Event>(`${API_URL}Event/${eventId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -150,6 +157,9 @@ export const eventStores = defineStore('eventstore', () => {
 
   const updateEvent = async (eventId: string, updatedEvent: Partial<Event>) => {
     try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
       let imageUrl = typeof updatedEvent.eventImage === 'string' ? updatedEvent.eventImage : ''
       let previewUrl =
         typeof updatedEvent.eventPreview === 'string' ? updatedEvent.eventPreview : ''
@@ -210,6 +220,9 @@ export const eventStores = defineStore('eventstore', () => {
 
   const getGuestListByEventId = async (eventId: string) => {
     try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
       const response = await axios.get<string[]>(`${API_URL}GuestList/${eventId}/userids`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -236,6 +249,9 @@ export const eventStores = defineStore('eventstore', () => {
 
   const getUserInfoById = async (userId: string): Promise<PublicUser | null> => {
     try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
       const response = await axios.get<PublicUser>(`${API_URL}user/id/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -251,6 +267,9 @@ export const eventStores = defineStore('eventstore', () => {
 
   const generateInviteLink = async (eventId: string): Promise<string | null> => {
     try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
       const res = await axios.post<{ inviteCode: string }>(
         `${API_URL}Invitation/event/${eventId}`,
         {},
@@ -269,6 +288,9 @@ export const eventStores = defineStore('eventstore', () => {
 
   const acceptInvite = async (inviteCode: string) => {
     try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
       const res = await axios.post(
         `${API_URL}Invitation/accept/${inviteCode}`,
         {},
@@ -288,6 +310,9 @@ export const eventStores = defineStore('eventstore', () => {
 
   const declineInvite = async (inviteCode: string) => {
     try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
       const res = await axios.post(
         `${API_URL}Invitation/decline/${inviteCode}`,
         {},
@@ -305,6 +330,88 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  const clearEvents = () => {
+    event.value = null
+    userEvents.value = []
+  }
+
+  const getPhotobyEventId = async (eventId: string) => {
+    try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
+      const response = await axios.get<string[]>(`${API_URL}photo/${eventId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const getPhotobyEven = response.data
+
+      return getPhotobyEven
+    } catch (error) {
+      console.error('Failed to fetch photo:', error)
+      return []
+    }
+  }
+
+  const getPhotobyUserId = async () => {
+    try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+      const userId = authStore.user?.userId
+
+      const response = await axios.get<string[]>(`${API_URL}photo/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const getPhotobyUser = response.data
+
+      return getPhotobyUser
+    } catch (error) {
+      console.error('Failed to fetch photo:', error)
+      return []
+    }
+  }
+
+  const postPhoto = async (createPhoto: {
+    eventIde: string
+    PhotoDescription: string
+    Date: string
+    createdAt: string
+  }) => {
+    {
+      try {
+        const authStore = useAuthStore()
+        const token = authStore.user?.token
+
+        const response = await axios.post(
+          `${API_URL}Event`,
+          {
+            eventIde: createPhoto.eventIde,
+            PhotoDescription: createPhoto.PhotoDescription,
+            Date: createPhoto.Date,
+            createdAt: createPhoto.createdAt,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
+
+        const uploadedPhoto = response.data
+        return uploadedPhoto
+      } catch (error) {
+        console.error('Failed to upload photo:', error)
+        return null
+      }
+    }
+  }
+
   return {
     event,
     creation,
@@ -317,5 +424,9 @@ export const eventStores = defineStore('eventstore', () => {
     generateInviteLink,
     acceptInvite,
     declineInvite,
+    clearEvents,
+    getPhotobyEventId,
+    getPhotobyUserId,
+    postPhoto,
   }
 })
