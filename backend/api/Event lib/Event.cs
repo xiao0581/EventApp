@@ -42,6 +42,9 @@ namespace Event_lib
         [BsonElement("created_by"), BsonRepresentation(BsonType.String)]
         public string CreatedBy { get; set; }
 
+        [BsonElement("event_images"), BsonRepresentation(BsonType.String)]
+        public List<string>? EventImages { get; set; } = new();
+
         public void ValidateTitle()
         {
             if (string.IsNullOrEmpty(EventTitle))
