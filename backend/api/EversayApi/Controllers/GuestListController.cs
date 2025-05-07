@@ -15,11 +15,9 @@ namespace EversayApi.Controllers
     public class GuestListController : ControllerBase
     {
         private readonly IMongoCollection<GuestList>? _guestLists;
-        //private readonly IMongoCollection<Applicationuser>? _userManager;
-        public GuestListController(MongoDbService mongoDbService/*, UserManager<IdentityUser> userManager*/)
+        public GuestListController(MongoDbService mongoDbService)
         {
             _guestLists = mongoDbService.Database?.GetCollection<GuestList>("guestlists");
-            //_userManager = (IMongoCollection<Applicationuser>?)userManager;
         }
 
         [HttpGet]
@@ -87,7 +85,6 @@ namespace EversayApi.Controllers
             return Ok(guestList);
         }
 
-
         [HttpGet("{eventId}/userids")]
         public async Task<ActionResult> GetUserIdsByEventId(string eventId)
         {
@@ -103,7 +100,6 @@ namespace EversayApi.Controllers
                 .Exclude("_id");
 
             var guestDocs = await _guestLists.Find(filter).Project(projection).ToListAsync();
-
         
             var userIds = guestDocs.Select(doc => doc["user_id"].AsString).ToList();
 

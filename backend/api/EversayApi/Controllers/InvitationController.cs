@@ -37,9 +37,9 @@ namespace EversayApi.Controllers
             };
 
             await _invitations.InsertOneAsync(invitation);
-
             return Ok(new { inviteCode }); 
         }
+
         [HttpPost("accept/{inviteCode}")]
         public async Task<IActionResult> AcceptInvite(string inviteCode)
         {
@@ -98,7 +98,6 @@ namespace EversayApi.Controllers
             {
                 return NotFound("Invitation not found");
             }
-
             
             var existing = await _guestList.Find(x => x.EventId == invitation.EventId && x.UserId == userId).FirstOrDefaultAsync();
 
@@ -123,7 +122,6 @@ namespace EversayApi.Controllers
                 };
                 await _guestList.InsertOneAsync(guestList);
             }
-
             
             var invitationUpdate = Builders<Invitation>.Update
                 .Set(x => x.DeclinedUserId, userId)

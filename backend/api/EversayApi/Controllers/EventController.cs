@@ -26,11 +26,6 @@ namespace EversayApi.Controllers
             _guestList = mongoDbService.Database?.GetCollection<GuestList>("guestlists");
         }
 
-        public static string GenerateInvitationLink(string eventId)
-        {
-            return $"https://eversay.com/event/{eventId}"; //change this to the actual domain
-        }
-
         [HttpGet]
         public async Task<IEnumerable<Event>> GetAllEvents()
         {
@@ -103,11 +98,9 @@ namespace EversayApi.Controllers
         {
             try
             {
-               
                 var guestListFilter = Builders<GuestList>.Filter.And(
-                    Builders<GuestList>.Filter.Eq("user_id", userId),
-                    Builders<GuestList>.Filter.Eq("is_attending", true)
-                );
+                Builders<GuestList>.Filter.Eq("user_id", userId),
+                Builders<GuestList>.Filter.Eq("is_attending", true));
 
                 var guestEntries = await _guestList.Find(guestListFilter).ToListAsync();
 
@@ -150,7 +143,6 @@ namespace EversayApi.Controllers
                 return StatusCode(500, new { message = "An unexpected error occurred." });
             }
         }
-
 
         [HttpPost]
         public async Task<ActionResult> CreateEvent([FromBody] Event createdEvent)
@@ -234,10 +226,10 @@ namespace EversayApi.Controllers
             if (result.MatchedCount == 0)
                 return NotFound("Event not found");
 
-            
             var updatedEvent = await _events.Find(filter).FirstOrDefaultAsync();
             return Ok(updatedEvent);
         }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteEvent(string id)
         {
