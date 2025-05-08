@@ -6,7 +6,12 @@
 
   <div class="events-section">
     <h2>Celebration in 2 days</h2>
-    <div class="event-card" v-for="event in events" :key="event.id" @click="goToEvent(event.id)">
+    <div
+      class="event-card"
+      v-for="event in futureEvents"
+      :key="event.id"
+      @click="goToEvent(event.id)"
+    >
       <div class="event-card-image">
         <q-img v-if="sasToken" :src="event.image" alt="Event image" />
       </div>
@@ -48,7 +53,55 @@
       </div>
     </div>
   </div>
+  <h2 class="Ongoing">Ongoing event</h2>
+  <div class="events-section">
+    <div
+      class="event-card"
+      v-for="event in ongoingEvents"
+      :key="event.id"
+      @click="goToEvent(event.id)"
+    >
+      <div class="event-card-image">
+        <q-img v-if="sasToken" :src="event.image" alt="Event image" />
+      </div>
 
+      <div class="event-card-content">
+        <h5 class="event-title">{{ event.name }}</h5>
+        <div class="event-details">
+          <p class="event-time">
+            <q-icon name="schedule" /> {{ event.startTime }} | {{ event.date }}
+          </p>
+          <p class="event-location"><q-icon name="place" /> {{ event.location }}</p>
+        </div>
+
+        <div class="event-guests">
+          <div class="guest-avatars">
+            <q-avatar v-for="guest in event.guests?.slice(0, 5)" :key="guest.id" size="32px">
+              <q-img :src="guest.avatar || '/assets/pic/luca.png'" alt="guest avatar" />
+            </q-avatar>
+            <span v-if="event.guests.length > 5" class="additional-guests">
+              +{{ event.guests.length - 5 }}
+            </span>
+          </div>
+          <q-btn
+            flat
+            label="View all guests"
+            class="all-guests"
+            :to="`/event/${event?.id}/guests`"
+            style="text-transform: none"
+            @click.stop
+          />
+        </div>
+
+        <div class="custom-preview-button">
+          <span class="button-text">Catch the celebration vibe with a quick preview</span>
+          <div class="button-icon">
+            <q-icon name="double_arrow" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <!--   <div class="invitations-section">
     <h2>My Invitations</h2>
     <InvitationsCompo />
@@ -63,7 +116,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { eventStores } from 'src/stores/eventstores'
-/* import InvitationsCompo from 'src/components/InvitationsCom.vue' */
 import UpcomingEvent from 'src/components/UpcomingEvent.vue'
 import { getReadSasToken } from 'src/utils/azureUploader'
 import { useRouter } from 'vue-router'
@@ -100,9 +152,11 @@ const goToEvent = async (id: string) => {
 
 const sasToken = ref<string>('')
 
-const events = ref<EventWithGuests[]>([])
+const futureEvents = ref<EventWithGuests[]>([])
+const ongoingEvents = ref<EventWithGuests[]>([])
 
 const today = new Date()
+
 const dayAfterTomorrow = new Date()
 dayAfterTomorrow.setDate(today.getDate() + 2)
 
@@ -118,61 +172,77 @@ onMounted(async () => {
 
     const rawEvents = eventStore.userEvents
 
-    const upcomingEvents = rawEvents.filter((event) => {
+    const future = rawEvents.filter((event) => {
       if (!event.eventDate) return false
       const eventDate = new Date(event.eventDate)
       return !isNaN(eventDate.getTime()) && eventDate >= today && eventDate < dayAfterTomorrow
     })
 
-    const withGuests: EventWithGuests[] = await Promise.all(
-      upcomingEvents.map(async (event): Promise<EventWithGuests> => {
-        try {
-          const guestIds = await eventStore.getGuestListByEventId(event.eventId)
-          const uniqueIds = [...new Set(guestIds.filter((id) => id?.trim() !== ''))]
-          const users = await Promise.all(uniqueIds.map((id) => eventStore.getUserInfoById(id)))
-          const guests: Guest[] = users.filter(Boolean).map((u) => ({
-            id: u!.userId,
-            name: u!.userName,
-            avatar: buildImageUrl(u!.profilePicture),
-          }))
+    const ongoing = rawEvents.filter((event) => {
+      if (!event.eventDate) return false
+      const eventDate = new Date(event.eventDate)
+      const now = new Date()
 
-          return {
-            id: event.eventId,
-            name: event.eventTitle,
-            description: event.eventDescription,
-            date: event.eventDate?.split('T')[0] ?? '',
-            startTime: event.eventDate?.split('T')[1]?.slice(0, 5) ?? '',
-            image:
-              typeof event.eventImage === 'string'
-                ? `${event.eventImage}?${sasToken.value}`
-                : 'default-event.jpg',
-            location: event.eventLocation,
-            category: event.eventCategory,
-            createdBy: event.createdBy,
-            guests,
-          }
-        } catch (err) {
-          console.error(`Error loading guests for event ${event.eventId}:`, err)
-          return {
-            id: event.eventId,
-            name: event.eventTitle,
-            description: event.eventDescription,
-            date: event.eventDate?.split('T')[0] ?? '',
-            startTime: event.eventDate?.split('T')[1]?.slice(0, 5) ?? '',
-            image:
-              typeof event.eventImage === 'string'
-                ? `${event.eventImage}?${sasToken.value}`
-                : 'default-event.jpg',
-            location: event.eventLocation,
-            category: event.eventCategory,
-            createdBy: event.createdBy,
-            guests: [],
-          }
-        }
-      }),
-    )
+      const isSameDay =
+        eventDate.getFullYear() === now.getFullYear() &&
+        eventDate.getMonth() === now.getMonth() &&
+        eventDate.getDate() === now.getDate()
 
-    events.value = withGuests
+      return isSameDay && eventDate <= now
+    })
+
+    const processEvents = async (list: typeof rawEvents) => {
+      return await Promise.all(
+        list.map(async (event): Promise<EventWithGuests> => {
+          try {
+            const guestIds = await eventStore.getGuestListByEventId(event.eventId)
+            const uniqueIds = [...new Set(guestIds.filter((id) => id?.trim() !== ''))]
+            const users = await Promise.all(uniqueIds.map((id) => eventStore.getUserInfoById(id)))
+            const guests: Guest[] = users.filter(Boolean).map((u) => ({
+              id: u!.userId,
+              name: u!.userName,
+              avatar: buildImageUrl(u!.profilePicture),
+            }))
+
+            return {
+              id: event.eventId,
+              name: event.eventTitle,
+              description: event.eventDescription,
+              date: event.eventDate?.split('T')[0] ?? '',
+              startTime: event.eventDate?.split('T')[1]?.slice(0, 5) ?? '',
+              image:
+                typeof event.eventImage === 'string'
+                  ? `${event.eventImage}?${sasToken.value}`
+                  : 'default-event.jpg',
+              location: event.eventLocation,
+              category: event.eventCategory,
+              createdBy: event.createdBy,
+              guests,
+            }
+          } catch (err) {
+            console.error(`Error loading guests for event ${event.eventId}:`, err)
+            return {
+              id: event.eventId,
+              name: event.eventTitle,
+              description: event.eventDescription,
+              date: event.eventDate?.split('T')[0] ?? '',
+              startTime: event.eventDate?.split('T')[1]?.slice(0, 5) ?? '',
+              image:
+                typeof event.eventImage === 'string'
+                  ? `${event.eventImage}?${sasToken.value}`
+                  : 'default-event.jpg',
+              location: event.eventLocation,
+              category: event.eventCategory,
+              createdBy: event.createdBy,
+              guests: [],
+            }
+          }
+        }),
+      )
+    }
+
+    futureEvents.value = await processEvents(future)
+    ongoingEvents.value = await processEvents(ongoing)
   } catch (error) {
     console.error('Error loading events with guests:', error)
   }
@@ -376,7 +446,10 @@ h2 {
   color: #42a5f5;
   cursor: pointer;
 }
-
+.Ongoing {
+  margin-bottom: -10px;
+  margin-left: 15px;
+}
 .upcoming-events-section h2 {
   margin-bottom: -20px;
   margin-left: 15px;

@@ -87,20 +87,6 @@
           filled
           class="q-mt-md"
         />
-        <div class="input-label">start time</div>
-        <q-input filled v-model="eventData.startTime">
-          <template v-slot:append>
-            <q-icon name="access_time" class="cursor-pointer" color="primary">
-              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                <q-time v-model="eventData.startTime" mask="HH:mm" format24h>
-                  <div class="row items-center justify-end">
-                    <q-btn v-close-popup label="Close" color="primary" flat />
-                  </div>
-                </q-time>
-              </q-popup-proxy>
-            </q-icon>
-          </template>
-        </q-input>
 
         <div class="input-label">End time</div>
         <q-input filled v-model="eventData.endTime">
@@ -200,28 +186,32 @@ const updatePosterPreview = (file: File | null) => {
   }
 }
 const calculateDuration = (): number => {
-  const [startHour = 0, startMinute = 0] = eventData.startTime.split(':').map(Number)
-  const [endHour = 0, endMinute = 0] = eventData.endTime.split(':').map(Number)
+  if (!eventData.eventDate || !eventData.endTime) return 0
 
-  const startTotalMinutes = startHour * 60 + startMinute
-  const endTotalMinutes = endHour * 60 + endMinute
+  const start = new Date(eventData.eventDate)
 
-  let durationMinutes = endTotalMinutes - startTotalMinutes
+  const [startDateOnly] = eventData.eventDate.split(' ')
+  const end = new Date(`${startDateOnly} ${eventData.endTime}`)
 
-  if (durationMinutes < 0) {
-    durationMinutes += 24 * 60
+  if (end < start) {
+    end.setDate(end.getDate() + 1)
   }
 
-  return durationMinutes / 60
+  const durationMs = end.getTime() - start.getTime()
+  const durationHours = durationMs / (1000 * 60 * 60)
+
+  return durationHours
 }
 const eventcreate = async (): Promise<void> => {
   loading.value = true
   try {
     const calulated = calculateDuration()
+    console.log('Event data:', calulated.toString())
     const createdEvent = await useEventStore.creation({
       eventTitle: eventData.eventTitle,
       eventDescription: eventData.eventDescription,
       eventDate: eventData.eventDate,
+
       duration: calulated.toString(),
       createdAt: eventData.createdAt,
       expiredAt: eventData.eventDate,

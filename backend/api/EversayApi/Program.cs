@@ -10,8 +10,10 @@ using MongoDB.Bson.Serialization;
 using System.Text;
 using SasTokenLib;
 using SasTokenLib.SasTokenLib;
+using Modules.EventImage;
 using User_lib;
 using EversayApi.Services;
+using Event_lib.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 BsonSerializer.RegisterSerializer(new GuidSerializer(MongoDB.Bson.BsonType.String));
@@ -140,6 +142,11 @@ builder.Services.AddCors(options =>
 
 //SasToken
 builder.Services.AddSingleton<SasTokenRepository>();
+builder.Services.AddSingleton<EventImageRepository>(sp =>
+{
+    var mongoService = sp.GetRequiredService<MongoDbService>();
+    return new EventImageRepository(mongoService.Database);
+});
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddScoped<EversayApi.Services.UserService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

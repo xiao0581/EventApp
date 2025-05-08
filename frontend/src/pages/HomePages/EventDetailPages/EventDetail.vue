@@ -212,7 +212,46 @@
 
             <div class="masonry">
               <div class="masonry-item" v-for="item in memoryList" :key="item.id">
+                <div v-if="/\.(mp4|webm|mov)(\?|$)/i.test(item.url)" style="position: relative">
+                  <video
+                    :src="item.url"
+                    controls
+                    class="rounded-borders"
+                    style="width: 100%; border-radius: 12px; object-fit: cover"
+                  ></video>
+                  <div
+                    class="text-white"
+                    style="
+                      position: absolute;
+                      bottom: 8px;
+                      left: 8px;
+                      background-color: rgba(0, 0, 0, 0.4);
+                      padding: 4px 8px;
+                      border-radius: 4px;
+                      font-size: 14px;
+                    "
+                  >
+                    {{ item.description }}
+                  </div>
+                  <div
+                    style="
+                      position: absolute;
+                      bottom: 8px;
+                      right: 8px;
+                      display: flex;
+                      align-items: center;
+                      background-color: rgba(0, 0, 0, 0.4);
+                      padding: 4px 8px;
+                      border-radius: 4px;
+                    "
+                  >
+                    <q-icon name="favorite" color="white" size="16px" />
+                    <span class="q-ml-xs text-white">{{ item.likes }}</span>
+                  </div>
+                </div>
+
                 <q-img
+                  v-else
                   :src="item.url"
                   class="rounded-borders"
                   style="width: 100%; border-radius: 12px"
@@ -232,7 +271,6 @@
                     >
                       {{ item.description }}
                     </div>
-
                     <div
                       style="
                         position: absolute;
@@ -356,6 +394,16 @@ let map: L.Map | null = null
 const showUploadDialog = ref(false)
 const newDescription = ref('')
 const selectedUploadFile = ref<File | null>(null)
+
+interface MemoryItem {
+  id: string
+  url: string
+  description: string
+  likes: number
+  createdAt?: string
+}
+const memoryList = ref<MemoryItem[]>([])
+
 const MAX_FILE_SIZE_MB = 10
 const triggerUpload = () => {
   showUploadDialog.value = true
@@ -374,36 +422,6 @@ const onFileSelected = (e: Event) => {
   selectedUploadFile.value = file
 }
 
-const uploadMemory = async () => {
-  if (!selectedUploadFile.value) {
-    alert('Please select an image.')
-    return
-  }
-
-  const imageUrl = await uploadToAzureBlob(selectedUploadFile.value)
-
-  memoryList.value.unshift({
-    id: Date.now(),
-    url: imageUrl,
-    description: newDescription.value,
-    likes: 0,
-  })
-
-  selectedUploadFile.value = null
-  newDescription.value = ''
-  showUploadDialog.value = false
-}
-
-const memoryList = ref([
-  { id: 1, url: 'https://picsum.photos/300/200', description: '', likes: 15 },
-  { id: 2, url: 'https://picsum.photos/300/350', description: 'this is notStrictEqual', likes: 55 },
-  { id: 3, url: 'https://picsum.photos/300/250', description: ' notStrictEqual', likes: 3 },
-  { id: 4, url: 'https://picsum.photos/300/300', description: 'this is notStrictEqual', likes: 20 },
-  { id: 1, url: 'https://picsum.photos/300/600', description: ' notStrictEqual', likes: 13 },
-  { id: 1, url: 'https://picsum.photos/300/200', description: 'notStrictEqual', likes: 5 },
-  { id: 1, url: 'https://picsum.photos/300/500', description: 'this is notStrictEqual', likes: 12 },
-])
-
 const eventStarted = computed(() => {
   if (!event.value?.eventDate) return false
   return new Date() >= new Date(event.value.eventDate)
@@ -412,6 +430,17 @@ const eventStarted = computed(() => {
 onMounted(async () => {
   await userEvent.fetchEventById(eventId.value)
   sasToken.value = await getReadSasToken()
+
+  const photos = await userEvent.getPhotobyEventId(eventId.value)
+  memoryList.value = photos.map(
+    (p): MemoryItem => ({
+      id: p.id,
+      url: `${p.imageUrl}${sasToken.value}`,
+      description: p.imageDescription,
+      likes: 0,
+      createdAt: p.createdAt,
+    }),
+  )
 
   if (event.value?.eventLocation) {
     const coordinates = await getCoordinates(event.value.eventLocation)
@@ -426,6 +455,34 @@ onMounted(async () => {
   }
 })
 
+const uploadMemory = async () => {
+  if (!selectedUploadFile.value) {
+    alert('Please select an image.')
+    return
+  }
+
+  try {
+    const imageUrl = await uploadToAzureBlob(selectedUploadFile.value)
+
+    await userEvent.postPhoto(eventId.value, imageUrl, newDescription.value)
+
+    memoryList.value.unshift({
+      id: Date.now().toString(),
+      url: `${imageUrl}${sasToken.value}`,
+      description: newDescription.value,
+      likes: 0,
+      createdAt: new Date().toISOString(),
+    })
+
+    selectedUploadFile.value = null
+    newDescription.value = ''
+    showUploadDialog.value = false
+  } catch (error) {
+    console.error('Upload failed:', error)
+    alert('Upload failed')
+  }
+}
+
 watch(event, (newEvent) => {
   if (!isEditing.value && newEvent) {
     const date = new Date(newEvent.eventDate)
@@ -436,7 +493,6 @@ watch(event, (newEvent) => {
 
 watch(isDetailsCollapsed, (newVal) => {
   if (!newVal) {
-    // 展开详情后，地图可能显示不正常，需要重新计算大小
     setTimeout(() => {
       if (map) {
         map.invalidateSize()
@@ -559,7 +615,11 @@ const formatDate = (isoString: string | undefined) => {
 const formatTime = (isoString: string | undefined) => {
   if (!isoString) return ''
   const date = new Date(isoString)
-  return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  return date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'UTC',
+  })
 }
 
 const formatEndTime = (isoString: string | undefined, duration: string | undefined) => {
@@ -569,9 +629,13 @@ const formatEndTime = (isoString: string | undefined, duration: string | undefin
   const hours = Math.floor(durationFloat)
   const minutes = Math.round((durationFloat - hours) * 60)
   const date = new Date(isoString)
-  date.setHours(date.getHours() + hours)
-  date.setMinutes(date.getMinutes() + minutes)
-  return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  date.setUTCHours(date.getUTCHours() + hours)
+  date.setUTCMinutes(date.getUTCMinutes() + minutes)
+  return date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'UTC',
+  })
 }
 
 const getEventvideo = (video: string | File | null | undefined): string => {

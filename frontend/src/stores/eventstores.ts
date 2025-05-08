@@ -27,6 +27,15 @@ interface PublicUser {
   profilePicture: string
   userRole: string
 }
+export interface EventImage {
+  id: string
+  eventId: string
+  userId: string
+  imageUrl: string
+  imageDescription: string
+  createdAt: string
+}
+
 export const eventStores = defineStore('eventstore', () => {
   const event = ref<Event | null>(null)
 
@@ -335,81 +344,114 @@ export const eventStores = defineStore('eventstore', () => {
     userEvents.value = []
   }
 
-  const getPhotobyEventId = async (eventId: string) => {
+  const getPhotobyEventId = async (eventId: string): Promise<EventImage[]> => {
     try {
       const authStore = useAuthStore()
       const token = authStore.user?.token
 
-      const response = await axios.get<string[]>(`${API_URL}photo/${eventId}`, {
+      const response = await axios.get(`${API_URL}Eventimage/getImageByevent/${eventId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
 
-      const getPhotobyEven = response.data
-
-      return getPhotobyEven
+      return response.data
     } catch (error) {
-      console.error('Failed to fetch photo:', error)
+      console.error('Failed to fetch photo by event:', error)
       return []
     }
   }
-
-  const getPhotobyUserId = async () => {
+  const getPhotobyUserId = async (): Promise<EventImage[]> => {
     try {
       const authStore = useAuthStore()
       const token = authStore.user?.token
       const userId = authStore.user?.userId
 
-      const response = await axios.get<string[]>(`${API_URL}photo/${userId}`, {
+      const response = await axios.get(`${API_URL}Eventimage/getImageByuser/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
 
-      const getPhotobyUser = response.data
-
-      return getPhotobyUser
+      return response.data
     } catch (error) {
-      console.error('Failed to fetch photo:', error)
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return []
+      }
+
       return []
     }
   }
 
-  const postPhoto = async (createPhoto: {
-    eventIde: string
-    PhotoDescription: string
-    Date: string
-    createdAt: string
-  }) => {
-    {
-      try {
-        const authStore = useAuthStore()
-        const token = authStore.user?.token
+  const postPhoto = async (
+    eventId: string,
+    imageUrl: string,
+    description: string,
+  ): Promise<EventImage | null> => {
+    try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+      const userId = authStore.user?.userId
 
-        const response = await axios.post(
-          `${API_URL}Event`,
-          {
-            eventIde: createPhoto.eventIde,
-            PhotoDescription: createPhoto.PhotoDescription,
-            Date: createPhoto.Date,
-            createdAt: createPhoto.createdAt,
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        )
-
-        const uploadedPhoto = response.data
-        return uploadedPhoto
-      } catch (error) {
-        console.error('Failed to upload photo:', error)
-        return null
+      const payload = {
+        eventId: eventId,
+        userId: userId,
+        imageUrl: imageUrl,
+        imageDescription: description,
       }
+
+      const response = await axios.post(`${API_URL}EventImage/byevent/${eventId}`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      return response.data
+    } catch (error) {
+      console.error('Failed to upload photo:', error)
+      return null
     }
+  }
+
+  const postPhotoByUserId = async (
+    userId: string,
+    imageUrl: string,
+    description: string,
+  ): Promise<EventImage | null> => {
+    try {
+      const authStore = useAuthStore()
+      const token = authStore.user?.token
+
+      const payload = {
+        imageUrl: imageUrl,
+        imageDescription: description,
+      }
+
+      const response = await axios.post(`${API_URL}Eventimage/byuser/${userId}`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      return response.data
+    } catch (error) {
+      console.error('Failed to upload photo by userId:', error)
+      return null
+    }
+  }
+
+  const updateUser = async (payload: { userName: string; profilePicture: string }) => {
+    const authStore = useAuthStore()
+    const token = authStore.user?.token
+    const userId = authStore.user?.userId
+
+    await axios.put(`${API_URL}User/${userId}`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
   }
 
   return {
@@ -428,5 +470,7 @@ export const eventStores = defineStore('eventstore', () => {
     getPhotobyEventId,
     getPhotobyUserId,
     postPhoto,
+    postPhotoByUserId,
+    updateUser,
   }
 })

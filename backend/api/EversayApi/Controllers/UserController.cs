@@ -62,5 +62,40 @@ namespace EversayApi.Controllers
 
             return Ok(createdUser);
         }
+
+
+        [HttpPut("{userId}")]
+        public async Task<ActionResult> UpdateUser(string userId, [FromBody] UpdateUserDto updateDto)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.userId, userId);
+
+            var updateDef = new List<UpdateDefinition<User>>();
+
+            if (!string.IsNullOrWhiteSpace(updateDto.UserName))
+            {
+                updateDef.Add(Builders<User>.Update.Set(u => u.UserName, updateDto.UserName));
+            }
+
+            if (!string.IsNullOrWhiteSpace(updateDto.ProfilePicture))
+            {
+                updateDef.Add(Builders<User>.Update.Set(u => u.ProfilePicture, updateDto.ProfilePicture));
+            }
+
+            if (!updateDef.Any())
+            {
+                return BadRequest("No valid fields to update.");
+            }
+
+            var update = Builders<User>.Update.Combine(updateDef);
+
+            var result = await _users.UpdateOneAsync(filter, update);
+
+            if (result.MatchedCount == 0)
+            {
+                return NotFound($"User with ID {userId} not found.");
+            }
+
+            return Ok("User updated successfully.");
+        }
     }
 }
