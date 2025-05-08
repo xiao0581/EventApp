@@ -48,9 +48,8 @@ namespace EversayApi.Controllers
         public async Task<IActionResult> GetByUserId(string userId)
         {
             var images = await _repository.GetImagesByUserId(userId);
-            if (images == null || images.Count == 0)
-                return NotFound("No images found for this user.");
-            return Ok(images);
+            
+            return Ok(images ?? new List<EventImage>());
         }
 
        
