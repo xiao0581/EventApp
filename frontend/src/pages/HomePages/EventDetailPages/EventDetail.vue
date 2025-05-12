@@ -216,8 +216,9 @@
                   <video
                     :src="item.url"
                     controls
-                    class="rounded-borders"
+                    class="rounded-borders clickable"
                     style="width: 100%; border-radius: 12px; object-fit: cover"
+                    @click="openPreview(item.url)"
                   ></video>
                   <div
                     class="text-white"
@@ -253,8 +254,9 @@
                 <q-img
                   v-else
                   :src="item.url"
-                  class="rounded-borders"
+                  class="rounded-borders clickable"
                   style="width: 100%; border-radius: 12px"
+                  @click="openPreview(item.url)"
                 >
                   <div
                     class="absolute-bottom text-white photo-description"
@@ -357,6 +359,23 @@
       </q-dialog>
     </div>
 
+    <q-dialog v-model="showImageDialog">
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          max-width: 90vw;
+          max-height: 90vh;
+          background-color: rgba(0, 0, 0, 0.9);
+        "
+      >
+        <img
+          :src="previewImageUrl"
+          style="max-width: 90vw; max-height: 90vh; object-fit: contain"
+        />
+      </div>
+    </q-dialog>
     <router-view />
   </q-page>
 </template>
@@ -394,7 +413,14 @@ let map: L.Map | null = null
 const showUploadDialog = ref(false)
 const newDescription = ref('')
 const selectedUploadFile = ref<File | null>(null)
+const showImageDialog = ref(false)
+const previewImageUrl = ref('')
 
+const openPreview = (url: string) => {
+  previewImageUrl.value = url
+  showImageDialog.value = true
+  console.log('Previewing image:', url)
+}
 interface MemoryItem {
   id: string
   url: string
@@ -904,5 +930,9 @@ const getCoordinates = async (address: string) => {
   bottom: 10px;
   right: 20px;
   z-index: 999;
+}
+
+.clickable {
+  cursor: pointer;
 }
 </style>
