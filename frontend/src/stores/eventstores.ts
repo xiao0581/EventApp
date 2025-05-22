@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { uploadToAzureBlob } from 'src/utils/azureUploader'
 import axios from 'axios'
+import { DateTime } from 'luxon'
 const API_URL = import.meta.env.VITE_API_BASE_URL
 
 export interface Event {
@@ -67,8 +68,14 @@ export const eventStores = defineStore('eventstore', () => {
       if (createEvents.eventPreview) {
         previewUrl = await uploadToAzureBlob(createEvents.eventPreview)
       }
-      const eventDateObj = new Date(createEvents.eventDate.replace(' ', 'T') + ':00.000Z')
-      const formattedEventDate = eventDateObj.toISOString()
+      let formattedEventDate = ''
+      if (createEvents.eventDate) {
+        const cleaned = createEvents.eventDate.replace(' ', 'T').slice(0, 16)
+        const localDateTime = DateTime.fromFormat(cleaned, "yyyy-MM-dd'T'HH:mm")
+        if (localDateTime.isValid) {
+          formattedEventDate = localDateTime.toUTC().toISO()
+        }
+      }
       const createdBy = ''
 
       const response = await axios.post(
@@ -183,11 +190,12 @@ export const eventStores = defineStore('eventstore', () => {
 
       let formattedDate = ''
       if (updatedEvent.eventDate) {
-        formattedDate = new Date(
-          updatedEvent.eventDate.replace(' ', 'T') + ':00.000Z',
-        ).toISOString()
+        const cleaned = updatedEvent.eventDate.replace(' ', 'T').slice(0, 16)
+        const localDateTime = DateTime.fromFormat(cleaned, "yyyy-MM-dd'T'HH:mm")
+        if (localDateTime.isValid) {
+          formattedDate = localDateTime.toUTC().toISO()
+        }
       }
-
       const response = await axios.put<Event>(
         `${API_URL}Event/${eventId}`,
         {

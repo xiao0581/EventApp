@@ -8,7 +8,7 @@
       </div>
 
       <div class="button-group">
-        <q-btn label="LOG IN" rounded class="login-btn" to="/MainLoginView2" />
+        <q-btn label="LOG IN" rounded class="login-btn" to="/login" />
 
         <q-btn label="SIGN UP" rounded to="/registers" class="register-btn" />
       </div>

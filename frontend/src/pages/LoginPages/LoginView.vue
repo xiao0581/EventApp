@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center">
-    <q-btn flat round icon="arrow_back_ios" color="primary" class="back-btn" to="/MainLoginView2" />
+    <q-btn flat round icon="arrow_back_ios" color="primary" class="back-btn" to="/MainLoginView" />
     <div class="content">
       <q-img src="src/assets/pic/logo1.png" class="logo"></q-img>
       <q-img src="src/assets/pic/EverSay.png" class="eversay"></q-img>

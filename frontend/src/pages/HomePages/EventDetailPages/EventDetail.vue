@@ -173,63 +173,105 @@
     </div>
 
     <div class="event-section">
-      <template v-if="eventStarted">
-        <q-tabs
-          v-model="activeTab"
-          dense
-          class="text-black"
-          active-color="black"
-          indicator-color="primary"
-        >
-          <q-tab name="memories" label="Memories" />
-          <q-tab name="guests" label="Our guests" />
-        </q-tabs>
+      <!-- Tabs: Always visible -->
+      <q-tabs
+        v-model="activeTab"
+        dense
+        class="text-black"
+        active-color="black"
+        indicator-color="primary"
+      >
+        <q-tab name="memories" label="Memories" />
+        <q-tab name="guests" label="Our guests" />
+      </q-tabs>
 
-        <q-tab-panels v-model="activeTab" animated class="text-dark text-center">
-          <q-tab-panel name="guests" class="guests-panel">
-            <div class="row justify-end q-mt-sm">
-              <q-btn
-                v-if="canEditEvent"
-                dense
-                color="primary"
-                icon="link"
-                label="invite guests"
-                @click="onGenerateInvite"
-              />
-            </div>
-            <GuestListcompo :event-id="eventId" :grouped="false" />
+      <!-- Tab panels -->
+      <q-tab-panels v-model="activeTab" animated class="text-dark text-center">
+        <!-- Guests Panel -->
+        <q-tab-panel name="guests" class="guests-panel">
+          <div class="row justify-end q-mt-sm">
             <q-btn
-              flat
-              label="View all guests"
-              class="View-more-btn"
-              :to="`/event/${event?.eventId}/guests`"
-              style="text-transform: none"
+              v-if="canEditEvent"
+              dense
+              color="primary"
+              icon="link"
+              label="invite guests"
+              @click="onGenerateInvite"
             />
-          </q-tab-panel>
+          </div>
+          <GuestListcompo :event-id="eventId" :grouped="false" />
+          <q-btn
+            flat
+            label="View all guests"
+            class="View-more-btn"
+            :to="`/event/${event?.eventId}/guests`"
+            style="text-transform: none"
+          />
+        </q-tab-panel>
 
-          <q-tab-panel name="memories" class="memories-panel">
-            <q-btn fab color="primary" icon="add" class="upload-fab" @click="triggerUpload" />
+        <!-- Memories Panel -->
+        <q-tab-panel name="memories" class="memories-panel">
+          <q-btn fab color="primary" icon="add" class="upload-fab" @click="triggerUpload" />
 
-            <div class="masonry">
-              <div class="masonry-item" v-for="item in memoryList" :key="item.id">
-                <div v-if="/\.(mp4|webm|mov)(\?|$)/i.test(item.url)" style="position: relative">
-                  <video
-                    :src="item.url"
-                    controls
-                    class="rounded-borders clickable"
-                    style="width: 100%; border-radius: 12px; object-fit: cover"
-                    @click="openPreview(item.url)"
-                  ></video>
+          <div class="masonry">
+            <div class="masonry-item" v-for="item in memoryList" :key="item.id">
+              <div v-if="/\.(mp4|webm|mov)(\?|$)/i.test(item.url)" style="position: relative">
+                <video
+                  :src="item.url"
+                  controls
+                  class="rounded-borders clickable"
+                  style="width: 100%; border-radius: 12px; object-fit: cover"
+                  @click="openPreview(item.url)"
+                ></video>
+                <div
+                  class="text-white"
+                  style="
+                    position: absolute;
+                    bottom: 8px;
+                    left: 8px;
+                    background-color: rgba(0, 0, 0, 0.4);
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 14px;
+                  "
+                >
+                  {{ item.description }}
+                </div>
+                <div
+                  style="
+                    position: absolute;
+                    bottom: 8px;
+                    right: 8px;
+                    display: flex;
+                    align-items: center;
+                    background-color: rgba(0, 0, 0, 0.4);
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                  "
+                >
+                  <q-icon name="favorite" color="white" size="16px" />
+                  <span class="q-ml-xs text-white">{{ item.likes }}</span>
+                </div>
+              </div>
+
+              <q-img
+                v-else
+                :src="item.url"
+                class="rounded-borders clickable"
+                style="width: 100%; border-radius: 12px"
+                @click="openPreview(item.url)"
+              >
+                <div
+                  class="absolute-bottom text-white photo-description"
+                  style="background-color: transparent"
+                >
                   <div
-                    class="text-white"
                     style="
                       position: absolute;
-                      bottom: 8px;
                       left: 8px;
-                      background-color: rgba(0, 0, 0, 0.4);
-                      padding: 4px 8px;
-                      border-radius: 4px;
-                      font-size: 14px;
+                      bottom: 8px;
+                      display: flex;
+                      align-items: center;
                     "
                   >
                     {{ item.description }}
@@ -237,85 +279,23 @@
                   <div
                     style="
                       position: absolute;
-                      bottom: 8px;
                       right: 8px;
+                      bottom: 8px;
                       display: flex;
                       align-items: center;
-                      background-color: rgba(0, 0, 0, 0.4);
-                      padding: 4px 8px;
-                      border-radius: 4px;
                     "
                   >
                     <q-icon name="favorite" color="white" size="16px" />
-                    <span class="q-ml-xs text-white">{{ item.likes }}</span>
+                    <span class="q-ml-xs">{{ item.likes }}</span>
                   </div>
                 </div>
-
-                <q-img
-                  v-else
-                  :src="item.url"
-                  class="rounded-borders clickable"
-                  style="width: 100%; border-radius: 12px"
-                  @click="openPreview(item.url)"
-                >
-                  <div
-                    class="absolute-bottom text-white photo-description"
-                    style="background-color: transparent"
-                  >
-                    <div
-                      style="
-                        position: absolute;
-                        left: 8px;
-                        bottom: 8px;
-                        display: flex;
-                        align-items: center;
-                      "
-                    >
-                      {{ item.description }}
-                    </div>
-                    <div
-                      style="
-                        position: absolute;
-                        right: 8px;
-                        bottom: 8px;
-                        display: flex;
-                        align-items: center;
-                      "
-                    >
-                      <q-icon name="favorite" color="white" size="16px" />
-                      <span class="q-ml-xs">{{ item.likes }}</span>
-                    </div>
-                  </div>
-                </q-img>
-              </div>
+              </q-img>
             </div>
-          </q-tab-panel>
-        </q-tab-panels>
-      </template>
+          </div>
+        </q-tab-panel>
+      </q-tab-panels>
 
-      <template v-else>
-        <div class="row items-center justify-between q-pr-sm">
-          <h6 class="q-mb-sm">Our guests</h6>
-
-          <q-btn
-            v-if="canEditEvent"
-            dense
-            color="primary"
-            icon="link"
-            label="invite guests"
-            @click="onGenerateInvite"
-          />
-        </div>
-        <GuestListcompo :event-id="eventId" :grouped="false" />
-        <q-btn
-          flat
-          label="View all guests"
-          class="View-more-btn"
-          :to="`/event/${event?.eventId}/guests`"
-          style="text-transform: none"
-        />
-      </template>
-
+      <!-- Invite dialog -->
       <q-dialog v-model="showInviteDialog">
         <q-card style="min-width: 350px; max-width: 500px">
           <q-card-section>
@@ -335,13 +315,12 @@
         </q-card>
       </q-dialog>
 
+      <!-- Upload dialog -->
       <q-dialog v-model="showUploadDialog">
         <q-card style="min-width: 300px; max-width: 500px">
           <q-card-section>
             <div class="text-h6">Upload a Memory</div>
-
             <input type="file" accept="image/*,video/*" @change="onFileSelected" class="q-mt-sm" />
-
             <q-input
               v-model="newDescription"
               label="Description"
@@ -350,7 +329,6 @@
               class="q-mt-md"
             />
           </q-card-section>
-
           <q-card-actions align="right" class="justify-between">
             <q-btn flat label="Cancel" color="primary" v-close-popup />
             <q-btn flat label="Upload" color="primary" @click="uploadMemory" />
@@ -359,23 +337,6 @@
       </q-dialog>
     </div>
 
-    <q-dialog v-model="showImageDialog">
-      <div
-        style="
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          max-width: 90vw;
-          max-height: 90vh;
-          background-color: rgba(0, 0, 0, 0.9);
-        "
-      >
-        <img
-          :src="previewImageUrl"
-          style="max-width: 90vw; max-height: 90vh; object-fit: contain"
-        />
-      </div>
-    </q-dialog>
     <router-view />
   </q-page>
 </template>
@@ -407,7 +368,7 @@ const sasToken = ref('')
 const isDescriptionExpanded = ref(false)
 const selectedImageFile = ref<File | null>(null)
 const selectedVideoFile = ref<File | null>(null)
-const activeTab = ref('memories')
+const activeTab = ref('')
 const isDetailsCollapsed = ref(true)
 let map: L.Map | null = null
 const showUploadDialog = ref(false)
@@ -457,6 +418,7 @@ onMounted(async () => {
   await userEvent.fetchEventById(eventId.value)
   sasToken.value = await getReadSasToken()
 
+  activeTab.value = eventStarted.value ? 'memories' : 'guests'
   const photos = await userEvent.getPhotobyEventId(eventId.value)
   memoryList.value = photos.map(
     (p): MemoryItem => ({

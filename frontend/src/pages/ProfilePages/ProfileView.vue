@@ -2,13 +2,12 @@
   <q-page class="profile-page">
     <div class="banner">
       <q-img src="src/assets/pic/wedding.jpg" class="banner-img" />
-      <q-avatar
-        class="profile-avatar rounded-avatar"
-        size="100px"
-        @click="editAvatarDialog = true"
-        style="cursor: pointer"
-      >
-        <q-img :src="avatarUrl" class="avatar-img" />
+      <q-avatar class="profile-avatar" size="100px">
+        <q-img
+          :src="avatarUrl"
+          class="avatar-img"
+          style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0"
+        />
       </q-avatar>
     </div>
 
@@ -19,7 +18,7 @@
       <p class="user-email">{{ user.email }}</p>
       <p class="user-phone">{{ user.phone }}</p>
 
-      <div class="stats-row">
+      <!--  <div class="stats-row">
         <div class="stat">
           <div class="stat-number">122</div>
           <div class="stat-label">Relations</div>
@@ -32,12 +31,12 @@
           <div class="stat-number">37K</div>
           <div class="stat-label">Likes</div>
         </div>
-      </div>
+      </div> -->
 
       <div class="action-buttons">
         <q-btn
           flat
-          color="negative"
+          color="primary"
           icon="logout"
           label="Logout"
           @click="handleLogout"
@@ -285,8 +284,11 @@ onMounted(async () => {
   overflow: hidden;
 }
 .avatar-img {
+  position: absolute;
   width: 100%;
   height: 100%;
+  top: 0;
+  left: 0;
   object-fit: cover;
   border-radius: 50%;
 }
