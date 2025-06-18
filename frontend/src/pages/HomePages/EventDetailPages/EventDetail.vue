@@ -1,7 +1,10 @@
 <template>
   <q-page class="event-details-page">
     <div class="event-header">
+      <!-- Back to home button -->
       <q-btn flat round icon="arrow_back_ios" color="primary" class="back-btn" to="/home" />
+
+      <!-- Save button (only shown in editing mode) -->
       <q-btn
         v-if="isEditing"
         flat
@@ -11,6 +14,8 @@
         class="save-btn"
         @click="updateEvent"
       />
+
+      <!-- Edit button (only visible if user is the creator) -->
       <q-btn
         v-if="canEditEvent"
         flat
@@ -20,6 +25,8 @@
         class="edit-btn"
         @click="toggleEdit"
       />
+
+      <!-- Event banner image (view mode) -->
       <q-img
         v-if="sasToken && !isEditing"
         :src="getEventImage(event?.eventImage)"
@@ -27,6 +34,7 @@
         class="event-image"
       />
 
+      <!-- Image upload and preview (edit mode) -->
       <div v-else class="q-mt-md">
         <input
           type="file"
@@ -35,6 +43,8 @@
           class="hidden-file-input"
           @change="onImageSelected"
         />
+
+        <!-- Clickable image preview (edit mode) -->
         <q-img
           v-if="sasToken"
           :src="getEventImage(editedEvent.eventImage)"
@@ -43,9 +53,11 @@
         />
       </div>
 
+      <!-- Event title (only shown in view mode) -->
       <h1 v-if="!isEditing" class="event-title-display">{{ event?.eventTitle }}</h1>
 
       <div class="event-info">
+        <!-- Event title input (edit mode) -->
         <q-input
           v-if="isEditing"
           v-model="editedEvent.eventTitle"
@@ -54,9 +66,12 @@
           class="edit-field"
         />
 
+        <!-- Event description (view mode) -->
         <p v-if="!isEditing" class="event-description" :class="{ expanded: isDescriptionExpanded }">
           {{ event?.eventDescription }}
         </p>
+
+        <!-- Event description input (edit mode) -->
         <q-input
           v-else
           v-model="editedEvent.eventDescription"
@@ -65,6 +80,7 @@
           class="q-mt-md edit-field"
         />
 
+        <!-- Show more/less toggle button for long description -->
         <q-btn
           v-if="(event?.eventDescription || '').length > 100 && !isEditing"
           flat
@@ -74,6 +90,7 @@
           style="text-transform: none; margin-bottom: 8px"
         />
 
+        <!-- Show/hide details button when event has started -->
         <q-btn
           v-else-if="eventStarted && !isEditing"
           flat
@@ -82,11 +99,16 @@
           @click="toggleDetailsManually"
           style="text-transform: none; margin-bottom: 8px"
         />
+
+        <!-- Event details (date, time, location, map) -->
         <div class="event-details-time" v-show="!isDetailsCollapsed || !eventStarted">
           <div class="event-details-time">
+            <!-- Event date display (view mode) -->
             <p v-if="!isEditing" class="event-date">
               <q-icon name="date_range" /> {{ formatDate(event?.eventDate) }}
             </p>
+
+            <!-- Event date & time picker (edit mode) -->
             <q-input v-else filled v-model="editedEvent.eventDate" class="edit-field">
               <template v-slot:prepend>
                 <q-icon name="event" class="cursor-pointer">
@@ -113,11 +135,13 @@
               </template>
             </q-input>
 
+            <!-- Time & duration display (view mode) -->
             <p v-if="!isEditing" class="event-time">
               <q-icon name="schedule" /> {{ formatTime(event?.eventDate) }} -
               {{ formatEndTime(event?.eventDate, event?.duration) }}
             </p>
 
+            <!-- Duration input (edit mode) -->
             <q-input
               v-else
               type="number"
@@ -127,9 +151,12 @@
               class="q-mt-md edit-field"
             />
 
+            <!-- Location display (view mode) -->
             <p v-if="!isEditing" class="event-location">
               <q-icon name="place" /> {{ event?.eventLocation }}
             </p>
+
+            <!-- Location input (edit mode) -->
             <q-input
               v-else
               v-model="editedEvent.eventLocation"
@@ -137,19 +164,28 @@
               filled
               class="q-mt-md edit-field"
             />
+
+            <!-- Map display using Leaflet -->
             <div id="map" class="map-container"></div>
+
+            <!-- Message if location not set -->
             <p v-if="event && !event.eventLocation" class="text-center text-grey">
               📍 No location provided for this event.
             </p>
           </div>
+
+          <!-- Preview video section -->
           <div class="event-preview-video">
             <p class="event-preview">Catch the celebration vibe with a quick preview</p>
+
+            <!-- Video player (view mode) -->
             <q-video
               v-if="sasToken && !isEditing"
               :src="getEventvideo(event?.eventPreview)"
               class="event-video"
             ></q-video>
 
+            <!-- Upload video input (edit mode) -->
             <div v-else class="q-mt-md">
               <input
                 type="file"
@@ -172,6 +208,7 @@
       </div>
     </div>
 
+    <!-- Tabs for Memories and Guests -->
     <div class="event-section">
       <!-- Tabs: Always visible -->
       <q-tabs
@@ -189,6 +226,7 @@
       <q-tab-panels v-model="activeTab" animated class="text-dark text-center">
         <!-- Guests Panel -->
         <q-tab-panel name="guests" class="guests-panel">
+          <!-- Button to invite guests (creator only) -->
           <div class="row justify-end q-mt-sm">
             <q-btn
               v-if="canEditEvent"
@@ -199,7 +237,11 @@
               @click="onGenerateInvite"
             />
           </div>
+
+          <!-- Component that shows the guest list -->
           <GuestListcompo :event-id="eventId" :grouped="false" />
+
+          <!-- Link to full guest page -->
           <q-btn
             flat
             label="View all guests"
@@ -211,10 +253,13 @@
 
         <!-- Memories Panel -->
         <q-tab-panel name="memories" class="memories-panel">
+          <!-- Floating button to open upload dialog -->
           <q-btn fab color="primary" icon="add" class="upload-fab" @click="triggerUpload" />
 
+          <!-- Masonry layout for displaying uploaded memories -->
           <div class="masonry">
             <div class="masonry-item" v-for="item in memoryList" :key="item.id">
+              <!-- If the item is a video -->
               <div v-if="/\.(mp4|webm|mov)(\?|$)/i.test(item.url)" style="position: relative">
                 <video
                   :src="item.url"
@@ -223,6 +268,8 @@
                   style="width: 100%; border-radius: 12px; object-fit: cover"
                   @click="openPreview(item.url)"
                 ></video>
+
+                <!-- Video description -->
                 <div
                   class="text-white"
                   style="
@@ -237,6 +284,8 @@
                 >
                   {{ item.description }}
                 </div>
+
+                <!-- Video likes -->
                 <div
                   style="
                     position: absolute;
@@ -254,6 +303,7 @@
                 </div>
               </div>
 
+              <!-- If the item is an image -->
               <q-img
                 v-else
                 :src="item.url"
@@ -295,7 +345,7 @@
         </q-tab-panel>
       </q-tab-panels>
 
-      <!-- Invite dialog -->
+      <!-- Dialog for invite link -->
       <q-dialog v-model="showInviteDialog">
         <q-card style="min-width: 350px; max-width: 500px">
           <q-card-section>
@@ -315,7 +365,7 @@
         </q-card>
       </q-dialog>
 
-      <!-- Upload dialog -->
+      <!-- Dialog for uploading memories -->
       <q-dialog v-model="showUploadDialog">
         <q-card style="min-width: 300px; max-width: 500px">
           <q-card-section>
@@ -358,10 +408,19 @@ const inviteLink = ref('')
 const route = useRoute()
 const userEvent = eventStores()
 const authStore = useAuthStore()
+
+// Extract the event ID from route params
 const eventId = computed(() => route.params.id as string)
+
+// Reactive reference to the event from the store
 const event = computed(() => userEvent.event)
+
+// Get current user's ID from auth store
 const currentUserId = computed(() => authStore.user?.userId)
+
+// Check if the user is allowed to edit this event
 const canEditEvent = computed(() => currentUserId.value === event.value?.createdBy)
+
 const isEditing = ref(false)
 const editedEvent = ref({ ...event.value })
 const sasToken = ref('')
@@ -377,11 +436,14 @@ const selectedUploadFile = ref<File | null>(null)
 const showImageDialog = ref(false)
 const previewImageUrl = ref('')
 
+// Open preview dialog for image or video
 const openPreview = (url: string) => {
   previewImageUrl.value = url
   showImageDialog.value = true
   console.log('Previewing image:', url)
 }
+
+// Memory item interface for media gallery
 interface MemoryItem {
   id: string
   url: string
@@ -391,11 +453,13 @@ interface MemoryItem {
 }
 const memoryList = ref<MemoryItem[]>([])
 
+// Max upload file size in MB
 const MAX_FILE_SIZE_MB = 10
 const triggerUpload = () => {
   showUploadDialog.value = true
 }
 
+// Show upload dialog
 const onFileSelected = (e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
@@ -409,11 +473,16 @@ const onFileSelected = (e: Event) => {
   selectedUploadFile.value = file
 }
 
+// Determine if the event has already started
 const eventStarted = computed(() => {
   if (!event.value?.eventDate) return false
   return new Date() >= new Date(event.value.eventDate)
 })
 
+// Vue.js Lifecycle   created-hook: fetch event details and initialize map
+//created - Access DOM elements, initialize libraries
+//updated -hook: react to changes in reactive data
+// Lifecycle hook: fetch event, photos, and location on mount
 onMounted(async () => {
   await userEvent.fetchEventById(eventId.value)
   sasToken.value = await getReadSasToken()
@@ -443,6 +512,7 @@ onMounted(async () => {
   }
 })
 
+// Upload selected image or video to Azure and add to memory list
 const uploadMemory = async () => {
   if (!selectedUploadFile.value) {
     alert('Please select an image.')
@@ -471,6 +541,7 @@ const uploadMemory = async () => {
   }
 }
 
+// Update editedEvent when event changes
 watch(event, (newEvent) => {
   if (!isEditing.value && newEvent) {
     const date = new Date(newEvent.eventDate)
@@ -479,6 +550,7 @@ watch(event, (newEvent) => {
   }
 })
 
+// Redraw map when detail section is expanded
 watch(isDetailsCollapsed, (newVal) => {
   if (!newVal) {
     setTimeout(() => {
@@ -489,7 +561,7 @@ watch(isDetailsCollapsed, (newVal) => {
   }
 })
 
-//generate invite link
+// Generate an invite link and open the dialog
 const onGenerateInvite = async () => {
   if (!event.value?.eventId) return
 
@@ -499,23 +571,25 @@ const onGenerateInvite = async () => {
     showInviteDialog.value = true
   }
 }
+// Toggle showing event details manually
 const toggleDetailsManually = () => {
   isDetailsCollapsed.value = !isDetailsCollapsed.value
 }
-
+// Copy the invite link to clipboard
 const copyInviteLink = async () => {
   if (!inviteLink.value) return
   await navigator.clipboard.writeText(inviteLink.value)
   alert('copied to clipboard')
 }
 
-// clickable image input
+// Reference and trigger for image input field
 const imageInputRef = ref<HTMLInputElement | null>(null)
 
 const triggerImageInput = () => {
   imageInputRef.value?.click()
 }
 
+// Handle selected image for preview
 const onImageSelected = (e: Event) => {
   const target = e.target as HTMLInputElement
   const file = target.files?.[0]
@@ -525,13 +599,13 @@ const onImageSelected = (e: Event) => {
   }
 }
 
-// clickable video input
+// Reference and trigger for video input field
 const videoInputRef = ref<HTMLInputElement | null>(null)
-
 const triggerVideoInput = () => {
   videoInputRef.value?.click()
 }
 
+// Handle selected video for preview
 const onVideoSelected = (e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (file) {
@@ -540,10 +614,12 @@ const onVideoSelected = (e: Event) => {
   }
 }
 
+// Toggle edit mode
 const toggleEdit = () => {
   isEditing.value = !isEditing.value
 }
 
+// Save the updated event to backend
 const updateEvent = async () => {
   try {
     const updatedData = { ...editedEvent.value }
@@ -566,7 +642,7 @@ const updateEvent = async () => {
   }
 }
 
-//leaflet map
+// Load map with Leaflet using given coordinates
 const loadMap = (latitude: number, longitude: number) => {
   if (map) {
     map.remove()
@@ -580,6 +656,7 @@ const loadMap = (latitude: number, longitude: number) => {
   L.marker([latitude, longitude]).addTo(map).openPopup().bindPopup('Event location')
 }
 
+// Get full image URL from either string or File
 const getEventImage = (image: string | File | null | undefined): string => {
   if (!image) return 'default-event.jpg'
 
@@ -594,12 +671,14 @@ const getEventImage = (image: string | File | null | undefined): string => {
   return 'default-event.jpg'
 }
 
+// Format date in DD/MM/YYYY
 const formatDate = (isoString: string | undefined) => {
   if (!isoString) return ''
   const date = new Date(isoString)
   return date.toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
+// Format time in HH:mm (24h)
 const formatTime = (isoString: string | undefined) => {
   if (!isoString) return ''
   const date = new Date(isoString)
@@ -610,6 +689,7 @@ const formatTime = (isoString: string | undefined) => {
   })
 }
 
+// Calculate end time based on start time and duration
 const formatEndTime = (isoString: string | undefined, duration: string | undefined) => {
   if (!isoString || !duration) return ''
   const durationFloat = parseFloat(duration)
@@ -626,6 +706,7 @@ const formatEndTime = (isoString: string | undefined, duration: string | undefin
   })
 }
 
+// Get full video URL from either string or File
 const getEventvideo = (video: string | File | null | undefined): string => {
   if (!video) return 'default-event.jpg'
 
@@ -641,6 +722,7 @@ const getEventvideo = (video: string | File | null | undefined): string => {
 }
 /* const limitedGuests = computed(() => event.value?.guests.slice(0, 6) || []) */
 
+// Toggle event description expansion
 const toggleDescription = () => {
   isDescriptionExpanded.value = !isDescriptionExpanded.value
 
@@ -651,7 +733,7 @@ const toggleDescription = () => {
   }
 }
 
-//OpenStreetMap Nominatim API
+// Geocoding using OpenStreetMap's Nominatim API
 const getCoordinates = async (address: string) => {
   if (!address) {
     console.warn('No address provided')

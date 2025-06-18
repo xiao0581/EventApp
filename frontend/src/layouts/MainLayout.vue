@@ -1,8 +1,12 @@
 <template>
+  <!-- Main layout structure: Header, Page, Footer -->
   <q-layout view="lHh Lpr lFf">
+    <!-- Page container renders the current route component -->
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <!-- Bottom navigation footer (conditionally visible) -->
     <q-footer v-if="!hideFooter" class="custom-footer">
       <q-toolbar class="custom-toolbar">
         <q-btn
@@ -12,6 +16,8 @@
           class="toolbar-btn"
           :class="{ 'active-btn': isActive('/home') }"
         />
+
+        <!-- Navigation button: Calendar -->
         <q-btn
           flat
           icon="sym_o_calendar_month"
@@ -19,6 +25,8 @@
           class="toolbar-btn"
           :class="{ 'active-btn': isActive('/calendar') }"
         />
+
+        <!-- Navigation button: Message -->
         <q-btn
           flat
           icon="sym_o_forum"
@@ -26,6 +34,8 @@
           class="toolbar-btn"
           :class="{ 'active-btn': isActive('/message') }"
         />
+
+        <!-- Navigation button: Notifications -->
         <q-btn
           flat
           icon="sym_o_notifications"
@@ -33,6 +43,8 @@
           class="toolbar-btn"
           :class="{ 'active-btn': isActive('/notification') }"
         />
+
+        <!-- Navigation button: Profile/Login -->
         <q-btn
           flat
           icon="sym_o_person"
@@ -52,10 +64,16 @@ import { onMounted } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 const authStore = useAuthStore()
 const route = useRoute()
+
+// Load user data when layout is mounted
 onMounted(() => {
   authStore.loadUser()
 })
+
+// Whether to hide the footer, controlled via route meta
 const hideFooter = computed(() => route.meta.hideFooter)
+
+// Check if a route path is currently active
 const isActive = (path: string): boolean => {
   return route.path === path
 }

@@ -41,12 +41,14 @@ const router = useRouter()
 const authStore = useAuthStore()
 const eventStore = eventStores()
 
+// Extract invite code from route parameters
 const inviteCode = route.params.inviteCode as string
 const loading = ref(true)
 const showDialog = ref(false)
 const eventInfo = ref<Event | null>(null)
 const sasToken = ref<string>('')
 
+// Compute the final event image URL with SAS token
 const eventImageUrl = computed(() => {
   if (!eventInfo.value?.eventImage) return '/assets/pic/luca.png'
 
@@ -57,6 +59,7 @@ const eventImageUrl = computed(() => {
   return '/assets/pic/luca.png' // fallback for File/null
 })
 
+// Lifecycle: triggered when component is mounted
 onMounted(async () => {
   if (!authStore.user) {
     await router.replace({ path: '/MainLoginView', query: { redirect: route.fullPath } })
@@ -64,11 +67,14 @@ onMounted(async () => {
   }
 
   try {
+    // Accept the invitation using invite code
     const data = await eventStore.acceptInvite(inviteCode)
     if (!data) {
       await router.push('/home')
       return
     }
+
+    // Store event data and fetch SAS token
     eventInfo.value = data.event
     sasToken.value = await getReadSasToken()
     showDialog.value = true
@@ -80,6 +86,7 @@ onMounted(async () => {
   }
 })
 
+// Handle accept button click
 const handleAccept = async () => {
   showDialog.value = false
 
@@ -91,15 +98,20 @@ const handleAccept = async () => {
   await router.replace({ path: '/home', query: { invited: 'accepted' } })
 }
 
+// Handle decline button click
 const handleDecline = async () => {
   await eventStore.declineInvite(inviteCode)
   showDialog.value = false
   await router.replace({ path: '/home', query: { invited: 'declined' } })
 }
 
+// Format date as YYYY-MM-DD
+
 const formattedDate = computed(() =>
   eventInfo.value?.eventDate ? eventInfo.value.eventDate.split('T')[0] : '',
 )
+
+// Format time as HH:mm
 const formattedTime = computed(() =>
   eventInfo.value?.eventDate ? eventInfo.value.eventDate.split('T')[1]?.slice(0, 5) : '',
 )

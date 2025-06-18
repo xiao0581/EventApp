@@ -1,39 +1,52 @@
 <template>
+  <!-- Welcome section with title and create event button -->
   <div class="homecontainer">
     <p class="hometitle">Warm memories start here.</p>
     <q-btn class="homebutton" to="/EventForm" unelevated rounded label="+ Create an event" />
   </div>
 
+  <!-- Future events section: events within 2 days -->
   <div class="events-section">
     <h2>Celebration in 2 days</h2>
+
+    <!-- Event card loop for future events -->
     <div
       class="event-card"
       v-for="event in futureEvents"
       :key="event.id"
       @click="goToEvent(event.id)"
     >
+      <!-- Event image -->
       <div class="event-card-image">
         <q-img v-if="sasToken" :src="event.image" alt="Event image" />
       </div>
 
+      <!-- Event content block -->
       <div class="event-card-content">
         <h5 class="event-title">{{ event.name }}</h5>
+
+        <!-- Event date, time, and location -->
         <div class="event-details">
           <p class="event-time">
             <q-icon name="schedule" /> {{ event.startTime }} | {{ event.date }}
           </p>
           <p class="event-location"><q-icon name="place" /> {{ event.location }}</p>
         </div>
-
+        <!-- Guest avatars and link to full guest list -->
         <div class="event-guests">
           <div class="guest-avatars">
+            <!-- Show up to 5 guest avatars -->
             <q-avatar v-for="guest in event.guests?.slice(0, 5)" :key="guest.id" size="32px">
               <q-img :src="guest.avatar || '/assets/pic/luca.png'" alt="guest avatar" />
             </q-avatar>
+
+            <!-- Show "+X" if more than 5 guests -->
             <span v-if="event.guests.length > 5" class="additional-guests">
               +{{ event.guests.length - 5 }}
             </span>
           </div>
+
+          <!-- View all guests button -->
           <q-btn
             flat
             label="View all guests"
@@ -44,6 +57,7 @@
           />
         </div>
 
+        <!-- Preview section -->
         <div class="custom-preview-button">
           <span class="button-text">Catch the celebration vibe with a quick preview</span>
           <div class="button-icon">
@@ -53,18 +67,23 @@
       </div>
     </div>
   </div>
+
+  <!-- Ongoing event section (for events happening today) -->
   <h2 class="Ongoing">Ongoing event</h2>
   <div class="events-section">
+    <!-- Event card loop for ongoing events -->
     <div
       class="event-card"
       v-for="event in ongoingEvents"
       :key="event.id"
       @click="goToEvent(event.id)"
     >
+      <!-- Event image -->
       <div class="event-card-image">
         <q-img v-if="sasToken" :src="event.image" alt="Event image" />
       </div>
 
+      <!-- Event content block -->
       <div class="event-card-content">
         <h5 class="event-title">{{ event.name }}</h5>
         <div class="event-details">
@@ -74,6 +93,7 @@
           <p class="event-location"><q-icon name="place" /> {{ event.location }}</p>
         </div>
 
+        <!-- Guest avatars and link to guest list -->
         <div class="event-guests">
           <div class="guest-avatars">
             <q-avatar v-for="guest in event.guests?.slice(0, 5)" :key="guest.id" size="32px">
@@ -83,6 +103,8 @@
               +{{ event.guests.length - 5 }}
             </span>
           </div>
+
+          <!-- View all guests button -->
           <q-btn
             flat
             label="View all guests"
@@ -92,7 +114,7 @@
             @click.stop
           />
         </div>
-
+        <!-- Preview button -->
         <div class="custom-preview-button">
           <span class="button-text">Catch the celebration vibe with a quick preview</span>
           <div class="button-icon">
@@ -102,11 +124,8 @@
       </div>
     </div>
   </div>
-  <!--   <div class="invitations-section">
-    <h2>My Invitations</h2>
-    <InvitationsCompo />
-  </div> -->
 
+  <!-- Section for upcoming events (outside of today + next 2 days) -->
   <div class="upcoming-events-section">
     <h2>Upcoming Events</h2>
     <UpcomingEvent />
@@ -119,16 +138,18 @@ import { eventStores } from 'src/stores/eventstores'
 import UpcomingEvent from 'src/components/UpcomingEvent.vue'
 import { getReadSasToken } from 'src/utils/azureUploader'
 import { useRouter } from 'vue-router'
-
+// Initialize Vue Router
 const router = useRouter()
+// Get the event store instance from Pinia
 const eventStore = eventStores()
-
+// Interface for a guest user
 interface Guest {
   id: string
   name: string
   avatar: string
 }
 
+// Interface for an event including guest info
 interface EventWithGuests {
   id: string
   name: string
@@ -142,6 +163,7 @@ interface EventWithGuests {
   guests: Guest[]
 }
 
+// Navigate to the event detail page
 const goToEvent = async (id: string) => {
   try {
     await router.push(`/event/${id}`)
@@ -150,34 +172,43 @@ const goToEvent = async (id: string) => {
   }
 }
 
+// SAS token used to access Azure Blob Storage images
 const sasToken = ref<string>('')
 
+// Reactive variables to store processed future and ongoing events
 const futureEvents = ref<EventWithGuests[]>([])
 const ongoingEvents = ref<EventWithGuests[]>([])
 
+// Current date
 const today = new Date()
 
+// Day after tomorrow (used for filtering upcoming events within 2 days)
 const dayAfterTomorrow = new Date()
 dayAfterTomorrow.setDate(today.getDate() + 2)
 
+// Build full image URL with SAS token or use default image if none provided
 const buildImageUrl = (url: string | undefined): string => {
   if (!url) return '/assets/pic/luca.png'
   return `${url}${sasToken.value}`
 }
 
+// Main logic that runs when the component is mounted
 onMounted(async () => {
   try {
+    // Fetch a read-only SAS token to access images
     sasToken.value = await getReadSasToken()
+    // Load events created by the current user
     await eventStore.getEventsByuser()
-
     const rawEvents = eventStore.userEvents
 
+    // Filter upcoming events (today to the day after tomorrow)
     const future = rawEvents.filter((event) => {
       if (!event.eventDate) return false
       const eventDate = new Date(event.eventDate)
       return !isNaN(eventDate.getTime()) && eventDate >= today && eventDate < dayAfterTomorrow
     })
 
+    // Filter ongoing events (event date is today and already started)
     const ongoing = rawEvents.filter((event) => {
       if (!event.eventDate) return false
       const eventDate = new Date(event.eventDate)
@@ -191,6 +222,7 @@ onMounted(async () => {
       return isSameDay && eventDate <= now
     })
 
+    // Helper function to process events: fetch guest info and format data
     const processEvents = async (list: typeof rawEvents) => {
       return await Promise.all(
         list.map(async (event): Promise<EventWithGuests> => {
@@ -198,12 +230,14 @@ onMounted(async () => {
             const guestIds = await eventStore.getGuestListByEventId(event.eventId)
             const uniqueIds = [...new Set(guestIds.filter((id) => id?.trim() !== ''))]
             const users = await Promise.all(uniqueIds.map((id) => eventStore.getUserInfoById(id)))
+            // Map to guest objects
             const guests: Guest[] = users.filter(Boolean).map((u) => ({
               id: u!.userId,
               name: u!.userName,
               avatar: buildImageUrl(u!.profilePicture),
             }))
 
+            // Return processed event object with guests
             return {
               id: event.eventId,
               name: event.eventTitle,
@@ -220,6 +254,7 @@ onMounted(async () => {
               guests,
             }
           } catch (err) {
+            // Fallback if guest loading fails — return event without guests
             console.error(`Error loading guests for event ${event.eventId}:`, err)
             return {
               id: event.eventId,
@@ -240,7 +275,7 @@ onMounted(async () => {
         }),
       )
     }
-
+    // Process future and ongoing events and assign to reactive variables
     futureEvents.value = await processEvents(future)
     ongoingEvents.value = await processEvents(ongoing)
   } catch (error) {

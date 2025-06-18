@@ -1,7 +1,10 @@
 <template>
   <q-page class="profile-page">
+    <!-- Top banner with background image and avatar -->
     <div class="banner">
       <q-img src="src/assets/pic/wedding.jpg" class="banner-img" />
+
+      <!-- User avatar placed over the banner -->
       <q-avatar class="profile-avatar" size="100px">
         <q-img
           :src="avatarUrl"
@@ -11,6 +14,7 @@
       </q-avatar>
     </div>
 
+    <!-- User information block -->
     <div class="user-info">
       <h5 class="user-name" @click="editNameDialog = true" style="cursor: pointer">
         {{ user.fullName }}
@@ -18,6 +22,7 @@
       <p class="user-email">{{ user.email }}</p>
       <p class="user-phone">{{ user.phone }}</p>
 
+      <!-- Optionally show stats (disabled here) -->
       <!--  <div class="stats-row">
         <div class="stat">
           <div class="stat-number">122</div>
@@ -33,6 +38,7 @@
         </div>
       </div> -->
 
+      <!-- Logout button -->
       <div class="action-buttons">
         <q-btn
           flat
@@ -44,6 +50,7 @@
         />
       </div>
 
+      <!-- Tabs for switching between memories and albums -->
       <q-tabs
         v-model="activeTab"
         dense
@@ -54,12 +61,15 @@
         <q-tab name="memories" label="My Memories" />
         <q-tab name="albums" label="My albums" />
       </q-tabs>
+
+      <!-- Tab panels content -->
       <q-tab-panels v-model="activeTab" animated class="text-dark text-center">
         <q-tab-panel name="albums" class="albums-panel bg-grey-2"> </q-tab-panel>
-
         <q-tab-panel name="memories" class="memories-panel">
+          <!-- Masonry layout for photo/video memories -->
           <div class="masonry">
             <div class="masonry-item" v-for="item in memoryList" :key="item.id">
+              <!-- Show video if file is mp4/webm/mov -->
               <div v-if="/\\.(mp4|webm|mov)(\\?|$)/i.test(item.url)" style="position: relative">
                 <video
                   :src="item.url"
@@ -67,6 +77,8 @@
                   class="rounded-borders"
                   style="width: 100%; border-radius: 12px; object-fit: cover"
                 ></video>
+
+                <!-- Description label -->
                 <div
                   class="text-white"
                   style="
@@ -98,6 +110,7 @@
                 </div>
               </div>
 
+              <!-- Image display -->
               <q-img
                 v-else
                 :src="item.url"
@@ -132,6 +145,7 @@
     </div>
   </q-page>
 
+  <!-- Dialog for uploading new avatar -->
   <q-dialog v-model="editAvatarDialog">
     <q-card style="min-width: 300px">
       <q-card-section>
@@ -149,6 +163,7 @@
     </q-card>
   </q-dialog>
 
+  <!-- Dialog for editing full name -->
   <q-dialog v-model="editNameDialog">
     <q-card style="min-width: 300px">
       <q-card-section>
@@ -202,6 +217,7 @@ interface MemoryItem {
   createdAt?: string
 }
 
+// Upload avatar image and update in DB
 const updateUserAvatar = async () => {
   if (!avatarFile.value) return
   const newAvatarUrl = await uploadToAzureBlob(avatarFile.value)
@@ -212,17 +228,20 @@ const updateUserAvatar = async () => {
   editAvatarDialog.value = false
 }
 
+// Update user name in DB
 const updateUserName = async () => {
   await eventStore.updateUser({ userName: editName.value, profilePicture: user.value.avatarUrl })
   user.value.fullName = editName.value
   editNameDialog.value = false
 }
 
+// Logout and redirect
 const handleLogout = async () => {
   authStore.logout()
   await router.push('/MainLoginView')
 }
 
+// Load user info and photo memories
 onMounted(async () => {
   try {
     const currentUserId = authStore.user?.userId
@@ -248,6 +267,7 @@ onMounted(async () => {
     console.error('Error loading user info:', error)
   }
 
+  // Load user's memories and apply SAS token to image URLs
   const photos = await eventStore.getPhotobyUserId()
   const sas = await getReadSasToken()
   memoryList.value = photos.map((p) => ({

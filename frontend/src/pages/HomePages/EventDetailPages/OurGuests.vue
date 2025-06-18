@@ -1,13 +1,16 @@
 <template>
+  <!-- Header with back button and title -->
   <div class="Guestsheader">
     <q-btn flat class="back-btn" icon="arrow_back_ios" :to="`/event/${eventId}`" />
     <h6>Our guests</h6>
   </div>
 
+  <!-- Section title for "My Profile" -->
   <div class="MyProfile">
     <h6>My profile</h6>
   </div>
 
+  <!-- Section title and controls for "All Guests" -->
   <div class="AllGuests">
     <h6>All guests</h6>
     <div class="guests-icons">
@@ -16,6 +19,7 @@
     </div>
   </div>
 
+  <!-- Guest list component rendered below -->
   <div class="guests-list">
     <GuestListcompo :event-id="eventId" :grouped="false" />
   </div>
@@ -27,6 +31,8 @@ import { useRoute } from 'vue-router'
 import GuestListcompo from 'src/components/GuestListcompo.vue'
 
 const route = useRoute()
+
+// Compute event ID from route parameter
 const eventId = computed(() => route.params.id as string)
 </script>
 

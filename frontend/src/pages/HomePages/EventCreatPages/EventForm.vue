@@ -1,4 +1,5 @@
 <template>
+  <!-- Back button only shown on step 1 -->
   <q-btn v-if="step === 1" flat class="back-btn" icon="arrow_back_ios" to="/home" />
 
   <q-page class="event-page">
@@ -8,10 +9,12 @@
       </div>
     </div>
 
+    <!-- Main content -->
     <div class="content">
       <div v-if="step === 1">
         <div class="section-title">Create warm memories</div>
 
+        <!-- Upload event cover image -->
         <div class="upload-area">
           <q-file
             class="file-input"
@@ -26,6 +29,7 @@
           </div>
         </div>
 
+        <!-- Upload preview video -->
         <div class="upload-area">
           <q-file
             class="file-input"
@@ -43,6 +47,7 @@
           </div>
         </div>
 
+        <!-- Event date and time -->
         <div class="input-label">Date</div>
         <div class="EventDate" style="max-width: 300px">
           <q-input filled v-model="eventData.eventDate">
@@ -72,6 +77,7 @@
           </q-input>
         </div>
 
+        <!-- Event title -->
         <div class="input-label">Title</div>
         <q-input
           v-model="eventData.eventTitle"
@@ -79,7 +85,7 @@
           filled
           class="q-mt-md"
         />
-
+        <!-- Event category -->
         <div class="input-label">Category</div>
         <q-input
           v-model="eventData.eventCategory"
@@ -88,6 +94,7 @@
           class="q-mt-md"
         />
 
+        <!-- End time -->
         <div class="input-label">End time</div>
         <q-input filled v-model="eventData.endTime">
           <template v-slot:append>
@@ -103,6 +110,7 @@
           </template>
         </q-input>
 
+        <!-- Event location -->
         <div class="input-label">Location</div>
         <q-input
           v-model="eventData.eventLocation"
@@ -111,6 +119,7 @@
           class="q-mt-md"
         />
 
+        <!-- Event description -->
         <div class="input-label">Description</div>
         <q-input
           v-model="eventData.eventDescription"
@@ -135,6 +144,7 @@
       </div>
     </div>
 
+    <!-- Footer navigation buttons -->
     <div class="footer" :class="{ 'footer-right': step === 1, 'footer-default': step > 1 }">
       <q-btn v-if="step > 1" label="Back" outline @click="prevStep" />
       <q-btn
@@ -155,6 +165,8 @@ import { useRouter } from 'vue-router'
 import { eventStores } from 'src/stores/eventstores'
 import { Notify } from 'quasar'
 const useEventStore = eventStores()
+
+// Reactive form data
 const eventData = reactive({
   eventImage: null as File | null,
   eventPreview: null as File | null,
@@ -178,6 +190,7 @@ const step = ref<number>(1)
 const posterPreviewUrl = ref<string>('')
 const previewVideoUrl = ref<string>('')
 
+// Update image preview
 const updatePosterPreview = (file: File | null) => {
   if (file) {
     posterPreviewUrl.value = URL.createObjectURL(file)
@@ -185,6 +198,8 @@ const updatePosterPreview = (file: File | null) => {
     posterPreviewUrl.value = ''
   }
 }
+
+// Calculate event duration from date and end time
 const calculateDuration = (): number => {
   if (!eventData.eventDate || !eventData.endTime) return 0
 
@@ -202,6 +217,8 @@ const calculateDuration = (): number => {
 
   return durationHours
 }
+
+// Create event via store
 const eventcreate = async (): Promise<void> => {
   loading.value = true
   try {
@@ -237,6 +254,7 @@ const eventcreate = async (): Promise<void> => {
   }
 }
 
+// Update video preview
 const updatePreviewVideo = (file: File | null) => {
   if (file) {
     previewVideoUrl.value = URL.createObjectURL(file)
@@ -245,16 +263,19 @@ const updatePreviewVideo = (file: File | null) => {
   }
 }
 
+// Add host by email
 const addHost = () => {
   if (hostEmail.value) {
     console.log('Added host:', hostEmail.value)
   }
 }
 
+// Upload guest list
 const uploadGuestList = () => {
   console.log('Uploading guest list...')
 }
 
+// Manually add a guest
 const addGuestManually = () => {
   const guestName = prompt('Enter guest name:')
   if (guestName) {

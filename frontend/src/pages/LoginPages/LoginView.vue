@@ -1,6 +1,10 @@
 <template>
+  <!-- Full-page wrapper with background image -->
   <q-page class="flex flex-center">
+    <!-- Back button to return to the main login view -->
     <q-btn flat round icon="arrow_back_ios" color="primary" class="back-btn" to="/MainLoginView" />
+
+    <!-- Logo and slogan section -->
     <div class="content">
       <q-img src="src/assets/pic/logo1.png" class="logo"></q-img>
       <q-img src="src/assets/pic/EverSay.png" class="eversay"></q-img>
@@ -8,13 +12,17 @@
         <h7>Connecting people. One celebration at a time</h7>
       </div>
     </div>
+
+    <!-- Card container for login form -->
     <q-card class="q-pa-md">
       <q-card-section>
         <div class="text">Sign in</div>
       </q-card-section>
 
       <q-card-section>
+        <!-- Login form -->
         <q-form @submit.prevent="handleLogin" class="form-container">
+          <!-- Email input -->
           <q-input
             v-model="email"
             label="Username"
@@ -27,6 +35,7 @@
             </template>
           </q-input>
 
+          <!-- Password input -->
           <q-input
             v-model="password"
             label="Password"
@@ -39,13 +48,17 @@
               <q-icon name="lock" />
             </template>
           </q-input>
+
+          <!-- Remember me and forgot password links -->
           <div class="remember-container">
+            <!-- ❗️Error: binding password to checkbox! Should use separate boolean flag -->
             <q-checkbox v-model="password" label="Remember Me" color="accent" />
             <router-link to="/forgot-password" class="forgot-password">
               Forgot password?
             </router-link>
           </div>
 
+          <!-- Submit button -->
           <q-btn
             type="submit"
             label="Login"
@@ -74,6 +87,7 @@ const authStore = useAuthStore()
 
 const router = useRouter()
 
+// Handle login form submission
 const handleLogin = async (): Promise<void> => {
   loading.value = true
   try {
@@ -85,6 +99,7 @@ const handleLogin = async (): Promise<void> => {
       timeout: 1000,
     })
 
+    // Navigate to home after login
     await router.push('/home')
   } catch (error: unknown) {
     const message = (error as Error).message || 'An unknown error occurred.'

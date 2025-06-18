@@ -1,5 +1,6 @@
 <template>
   <q-list>
+    <!-- If grouped is true, render guests grouped by role -->
     <template v-if="grouped">
       <q-expansion-item
         v-for="(group, role) in groupedGuests"
@@ -8,16 +9,19 @@
         default-opened
       >
         <q-list>
+          <!-- Render each guest inside their group -->
           <q-card v-for="guest in group" :key="guest.id" class="q-mb-md q-pa-sm">
             <q-card-section class="row items-center">
               <q-avatar size="80px" class="q-mr-sm">
                 <q-img :src="guest.avatar || '/assets/images/default-avatar.png'" />
               </q-avatar>
 
+              <!-- Guest name -->
               <div class="col text-left">
                 <div class="text-weight-medium">{{ guest.name }}</div>
               </div>
 
+              <!-- Chat icon button -->
               <q-btn round icon="sym_o_chat_bubble" @click="sendMessage(guest)" />
             </q-card-section>
           </q-card>
@@ -25,6 +29,7 @@
       </q-expansion-item>
     </template>
 
+    <!-- If not grouped, render a flat guest list -->
     <template v-else>
       <q-card v-for="guest in guests" :key="guest.id" class="q-mb-md q-pa-sm">
         <q-card-section class="row items-center">
@@ -56,7 +61,7 @@ interface Guest {
   role: string
   avatar?: string
 }
-
+// Props from parent: eventId (required), grouped (optional)
 const props = defineProps<{
   eventId: string
   grouped?: boolean
@@ -65,17 +70,22 @@ const props = defineProps<{
 const eventStore = eventStores()
 const guests = ref<Guest[]>([])
 
+// Fetch guest data when component is mounted
 onMounted(async () => {
   try {
     sasToken.value = await getReadSasToken()
     const guestIds = await eventStore.getGuestListByEventId(props.eventId)
 
+    // Remove blank or invalid IDs
     const validIds = guestIds.filter((id) => id && id.trim() !== '')
 
+    // Remove duplicates
     const uniqueIds = [...new Set(validIds)]
 
+    // Get user details for each unique ID
     const users = await Promise.all(uniqueIds.map((id) => eventStore.getUserInfoById(id)))
 
+    // Map user data to Guest objects and store in `guests`
     guests.value = users.filter(Boolean).map((u) => ({
       id: u!.userId,
       name: u!.userName,
@@ -87,11 +97,13 @@ onMounted(async () => {
   }
 })
 
+// Helper function to build full image URL with SAS token
 const buildImageUrl = (url: string | undefined): string => {
   if (!url) return '/assets/pic/luca.png'
   return `${url}${sasToken.value}`
 }
 
+// Group guests by role (if grouped mode is active)
 const groupedGuests = computed(() => {
   if (!props.grouped) return {}
 
@@ -108,6 +120,7 @@ const groupedGuests = computed(() => {
   return groups
 })
 
+// Triggered when the chat button is clicked
 const sendMessage = (guest: Guest) => {
   alert(`Send message to ${guest.name}`)
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <h5 class="NotifictionTitle">Notifiction</h5>
+    <h5 class="NotifictionTitle">Notification</h5>
   </div>
 </template>
 <script setup lang="ts"></script>

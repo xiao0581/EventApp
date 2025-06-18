@@ -42,6 +42,7 @@ export const eventStores = defineStore('eventstore', () => {
 
   const userEvents = ref<Event[]>([])
 
+  // Creates a new event and uploads associated images
   const creation = async (createEvents: {
     eventTitle: string
     eventDescription: string
@@ -113,6 +114,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Fetches all events where the current user is a guest
   const getEventsByuser = async () => {
     const authStore = useAuthStore()
     const token = authStore.user?.token
@@ -139,6 +141,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Fetches a single event by its ID
   const fetchEventById = async (eventId: string) => {
     const existingEvent = userEvents.value.find((event) => event.eventId === eventId)
     if (existingEvent) {
@@ -171,6 +174,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Updates an event's details and handles image uploading
   const updateEvent = async (eventId: string, updatedEvent: Partial<Event>) => {
     try {
       const authStore = useAuthStore()
@@ -235,6 +239,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Retrieves the guest list for a given event
   const getGuestListByEventId = async (eventId: string) => {
     try {
       const authStore = useAuthStore()
@@ -264,6 +269,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Fetches public user information by user ID
   const getUserInfoById = async (userId: string): Promise<PublicUser | null> => {
     try {
       const authStore = useAuthStore()
@@ -282,6 +288,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Generates an invitation link for an event
   const generateInviteLink = async (eventId: string): Promise<string | null> => {
     try {
       const authStore = useAuthStore()
@@ -303,6 +310,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Accepts an invitation using a code
   const acceptInvite = async (inviteCode: string) => {
     try {
       const authStore = useAuthStore()
@@ -325,6 +333,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Declines an invitation using a code
   const declineInvite = async (inviteCode: string) => {
     try {
       const authStore = useAuthStore()
@@ -347,11 +356,13 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Clears the current event and event list from store
   const clearEvents = () => {
     event.value = null
     userEvents.value = []
   }
 
+  // Retrieves all photos associated with an event
   const getPhotobyEventId = async (eventId: string): Promise<EventImage[]> => {
     try {
       const authStore = useAuthStore()
@@ -369,6 +380,8 @@ export const eventStores = defineStore('eventstore', () => {
       return []
     }
   }
+
+  // Retrieves all photos uploaded by the current user
   const getPhotobyUserId = async (): Promise<EventImage[]> => {
     try {
       const authStore = useAuthStore()
@@ -391,6 +404,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Uploads a new photo to an event
   const postPhoto = async (
     eventId: string,
     imageUrl: string,
@@ -421,6 +435,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Uploads a photo associated with a user
   const postPhotoByUserId = async (
     userId: string,
     imageUrl: string,
@@ -449,6 +464,7 @@ export const eventStores = defineStore('eventstore', () => {
     }
   }
 
+  // Updates the user's profile details
   const updateUser = async (payload: { userName: string; profilePicture: string }) => {
     const authStore = useAuthStore()
     const token = authStore.user?.token

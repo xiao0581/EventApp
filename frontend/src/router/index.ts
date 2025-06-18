@@ -33,15 +33,24 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   })
 
+  // Global navigation guard
   Router.beforeEach((to, from, next) => {
     const authStore = useAuthStore()
+
+    // Try to load user if not already loaded
     if (!authStore.user) {
       authStore.loadUser()
     }
+
+    // Redirect authenticated users away from guest-only routes
     if (to.meta.requiresGuest && authStore.isAuthenticated) {
       next('/home')
+
+      // Redirect unauthenticated users from protected routes
     } else if (to.meta.requiresAuth && !authStore.isAuthenticated) {
       next('/MainLoginView')
+
+      // Otherwise, allow navigation
     } else {
       next()
     }

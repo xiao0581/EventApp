@@ -1,5 +1,8 @@
 <template>
+  <!-- Back button to return to login -->
   <q-btn flat round icon="arrow_back_ios" color="primary" class="back-btn" to="/MainLoginView" />
+
+  <!-- Page wrapper with background and centered content -->
   <q-page class="flex flex-center">
     <div class="content">
       <q-img src="src/assets/pic/logo1.png" class="logo"></q-img>
@@ -8,12 +11,15 @@
         <h7>Connecting people. One celebration at a time</h7>
       </div>
     </div>
+
+    <!-- Registration card -->
     <q-card class="q-pa-md">
       <q-card-section>
         <div class="text">Sign up</div>
       </q-card-section>
 
       <q-card-section>
+        <!-- Registration form -->
         <q-form @submit.prevent="handleRegister" class="form-container">
           <q-input
             v-model="form.email"
@@ -28,6 +34,7 @@
             </template>
           </q-input>
 
+          <!-- Name field -->
           <q-input
             v-model="form.Name"
             label="Name"
@@ -41,6 +48,7 @@
             </template>
           </q-input>
 
+          <!-- Password field -->
           <q-input
             v-model="form.password"
             label="Password"
@@ -54,6 +62,7 @@
             </template>
           </q-input>
 
+          <!-- Confirm password field -->
           <q-input
             v-model="form.confirmPassword"
             label="Confirm Password"
@@ -67,6 +76,7 @@
             </template>
           </q-input>
 
+          <!-- Submit button -->
           <q-btn
             type="submit"
             label="Register"
@@ -76,6 +86,8 @@
             :loading="loading"
             :disable="loading"
           />
+
+          <!-- Link to login page -->
           <div class="signup-container">
             <span>Joined us before? </span>
             <router-link to="/login" class="signup-link">Log in</router-link>
@@ -102,6 +114,7 @@ const loading = ref<boolean>(false)
 
 const authStore = useAuthStore()
 
+// Register user
 const handleRegister = async (): Promise<void> => {
   loading.value = true
   try {
