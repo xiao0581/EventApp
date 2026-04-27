@@ -6,8 +6,6 @@
 
     <!-- Logo and slogan section -->
     <div class="content">
-      <q-img src="src/assets/pic/logo1.png" class="logo"></q-img>
-      <q-img src="src/assets/pic/EverSay.png" class="eversay"></q-img>
       <div class="title">
         <h7>Connecting people. One celebration at a time</h7>
       </div>
