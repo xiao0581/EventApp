@@ -28,6 +28,11 @@ namespace EversayApi.Controllers
         [HttpPost("event/{eventId}")]
         public async Task<IActionResult> GenerateInvite(string eventId)
         {
+            if (string.IsNullOrWhiteSpace(eventId))
+            {
+                return BadRequest("EventId is required");
+            }
+
             var inviteCode = Guid.NewGuid().ToString();
 
             var invitation = new Invitation
@@ -37,12 +42,17 @@ namespace EversayApi.Controllers
             };
 
             await _invitations.InsertOneAsync(invitation);
-            return Ok(new { inviteCode }); 
+            return Ok(new { inviteCode });
         }
 
         [HttpPost("accept/{inviteCode}")]
         public async Task<IActionResult> AcceptInvite(string inviteCode)
         {
+            if (string.IsNullOrWhiteSpace(inviteCode))
+            {
+                return BadRequest("Invite code is required");
+            }
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var invitation = await _invitations.Find(i => i.InviteCode == inviteCode).FirstOrDefaultAsync();
@@ -91,6 +101,10 @@ namespace EversayApi.Controllers
         [HttpPost("decline/{inviteCode}")]
         public async Task<IActionResult> DeclineInvite(string inviteCode)
         {
+            if (string.IsNullOrWhiteSpace(inviteCode))
+            {
+                return BadRequest("Invite code is required");
+            }
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var invitation = await _invitations.Find(i => i.InviteCode == inviteCode).FirstOrDefaultAsync();

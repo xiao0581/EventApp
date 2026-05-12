@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SasTokenLib", "SasTokenLib\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.EventImage", "EventImage\Modules.EventImage.csproj", "{D9DCBB58-0378-437B-8C66-D758E09B94A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EversayApi.Tests", "EversayApi.Tests\EversayApi.Tests.csproj", "{13C0AE90-5FCA-417E-B53C-D23309DF1F92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EversayApi.BDDTests", "EversayApi.BDDTests\EversayApi.BDDTests.csproj", "{DE458745-2418-4986-8B1A-F4E49A86DBB7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,8 +61,19 @@ Global
 		{D9DCBB58-0378-437B-8C66-D758E09B94A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9DCBB58-0378-437B-8C66-D758E09B94A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9DCBB58-0378-437B-8C66-D758E09B94A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13C0AE90-5FCA-417E-B53C-D23309DF1F92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13C0AE90-5FCA-417E-B53C-D23309DF1F92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13C0AE90-5FCA-417E-B53C-D23309DF1F92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13C0AE90-5FCA-417E-B53C-D23309DF1F92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE458745-2418-4986-8B1A-F4E49A86DBB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE458745-2418-4986-8B1A-F4E49A86DBB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE458745-2418-4986-8B1A-F4E49A86DBB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE458745-2418-4986-8B1A-F4E49A86DBB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A1B38B78-2D13-41AF-9805-C95A3BA84DE0}
 	EndGlobalSection
 EndGlobal
