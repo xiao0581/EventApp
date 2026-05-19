@@ -57,9 +57,14 @@ builder.Services.AddAuthentication(x =>
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
-        ValidIssuer = "http://localhost:5102",
-        ValidAudience = "http://localhost:5102",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("d2f8b7e3a6c9f4d5e8f2c7b9a3d4e6f7c8b2a5f9d3e7c6b4a8f1d9e3b5c7a6f4")),
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+    Encoding.UTF8.GetBytes(
+        builder.Configuration["Jwt:Key"]
+        ?? throw new InvalidOperationException("JWT key is not configured.")
+    )
+),
         ClockSkew = TimeSpan.Zero,
     };
     x.Events = new JwtBearerEvents
@@ -133,9 +138,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "AllowAll", policy =>
     {
-        policy.AllowAnyOrigin() //later change to policy.WithOrigins and the domain
-        .AllowAnyMethod()
-        .AllowAnyHeader();
+          policy.WithOrigins("http://localhost:9000")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 

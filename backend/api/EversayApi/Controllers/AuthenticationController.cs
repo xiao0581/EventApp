@@ -21,16 +21,18 @@ namespace EversayApi.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserService _userService;
         private readonly IPasswordHasher<User> _passwordHasher;
-
+        private readonly IConfiguration _configuration;
         public AuthenticationController(UserManager<Applicationuser> userManager,
             RoleManager<ApplicationRole> roleManager,
             UserService userService,
-            IPasswordHasher<User> passwordHasher)
+            IPasswordHasher<User> passwordHasher,
+            IConfiguration configuration    )
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _userService = userService;
             _passwordHasher = passwordHasher;
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -142,7 +144,14 @@ namespace EversayApi.Controllers
                 var roleClaims = roles.Select(x => new Claim(ClaimTypes.Role, x));
                 claims.AddRange(roleClaims);
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("d2f8b7e3a6c9f4d5e8f2c7b9a3d4e6f7c8b2a5f9d3e7c6b4a8f1d9e3b5c7a6f4"));
+                var jwtKey = _configuration["Jwt:Key"];
+
+                if (string.IsNullOrWhiteSpace(jwtKey))
+                {
+                    throw new InvalidOperationException("JWT key is not configured.");
+                }
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
                 var expires = DateTime.Now.AddHours(24);
 

@@ -190,7 +190,26 @@ namespace EversayApi.Controllers
             if (updatedFields == null)
                 return BadRequest("No update data provided.");
 
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized("User not found");
+            }
+
             var filter = Builders<Event>.Filter.Eq(e => e.eventId, id);
+            var existingEvent = await _events.Find(filter).FirstOrDefaultAsync();
+
+            if (existingEvent == null)
+            {
+                return NotFound("Event not found");
+            }
+
+            if (existingEvent.CreatedBy != currentUserId)
+            {
+                return Forbid();
+            }
+
             var updates = new List<UpdateDefinition<Event>>();
 
             if (updatedFields.EventTitle != null)
@@ -238,7 +257,26 @@ namespace EversayApi.Controllers
                 return BadRequest("Invalid ID format");
             }
 
-            var filter = Builders<Event>.Filter.Eq("eventId", id);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized("User not found");
+            }
+
+            var filter = Builders<Event>.Filter.Eq(e => e.eventId, id);
+            var existingEvent = await _events.Find(filter).FirstOrDefaultAsync();
+
+            if (existingEvent == null)
+            {
+                return NotFound("Event not found");
+            }
+
+            if (existingEvent.CreatedBy != currentUserId)
+            {
+                return Forbid();
+            }
+
             var result = await _events.DeleteOneAsync(filter);
 
             if (result.DeletedCount > 0)

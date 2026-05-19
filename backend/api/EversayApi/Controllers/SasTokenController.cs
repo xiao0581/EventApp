@@ -43,8 +43,12 @@ namespace SasTokenLib
                 if (string.IsNullOrEmpty(_storageAccountName) || string.IsNullOrEmpty(_storageAccountKey))
                     return BadRequest("Azure Storage configuration is missing.");
 
-                if (request.ExpiryMinutes <= 0 || request.ExpiryMinutes > 1440)
-                    return BadRequest("Expiration time must be between 1 and 1440 minutes.");
+                const int MaxSasTokenExpiryMinutes = 30;
+
+                if (request.ExpiryMinutes <= 0 || request.ExpiryMinutes > MaxSasTokenExpiryMinutes)
+                {
+                    return BadRequest($"Expiration time must be between 1 and {MaxSasTokenExpiryMinutes} minutes.");
+                }
 
                 string sasToken = _sasTokenRepository.GenerateSas(_storageAccountName, _storageAccountKey, _containerName, request);
 
